@@ -17,17 +17,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.campusdigitalfp.filmoteca.ui.theme.FilmotecaTheme
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AboutScreen();
+            AboutScreen()
         }
     }
 }
@@ -37,7 +37,7 @@ fun AboutScreen() {
 
     val context = LocalContext.current
 
-    Scaffold { innerPadding ->
+    Scaffold {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -48,18 +48,18 @@ fun AboutScreen() {
             // Tarjeta principal
             androidx.compose.material3.Card(
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(10.dp)
                     .fillMaxWidth(),
-                shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+                shape = MaterialTheme.shapes.medium,
                 elevation = androidx.compose.material3.CardDefaults.cardElevation(4.dp)
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp),
+                    modifier = Modifier.padding(20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
                         text = "Creada por Cristina García",
-                        style = androidx.compose.material3.MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.titleLarge
                     )
                     Image(
                         painter = painterResource(id = R.drawable.perfil),
@@ -72,8 +72,8 @@ fun AboutScreen() {
                     //Botones horizontales
                     Row(
                         modifier = Modifier
-                            .padding(top = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            .padding(top = 10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
                     ) {
                         FilledButton(
                             onClick = {
@@ -91,7 +91,8 @@ fun AboutScreen() {
                                     message = "Funcionalidad sin implementar"
                                 )
                             },
-                            texto = "Obtener soporte"
+                            texto = "Obtener soporte",
+
                         )
                     }
                     FilledButton(
@@ -103,8 +104,7 @@ fun AboutScreen() {
                         },
                         texto = "Volver",
                         modifier = Modifier
-                            .padding(top = 24.dp)
-                            .fillMaxWidth()
+                            .padding(top = 15.dp)
                     )
                 }
             }
@@ -127,7 +127,10 @@ fun FilledButton(
         onClick = onClick,
         modifier = modifier
     ){
-        Text(texto)
+        Text(
+            texto,
+            textAlign = TextAlign.Center
+       )
     }
  }
 
