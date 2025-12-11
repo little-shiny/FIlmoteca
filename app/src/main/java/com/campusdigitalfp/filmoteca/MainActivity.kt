@@ -1,6 +1,8 @@
 package com.campusdigitalfp.filmoteca
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -77,19 +79,14 @@ fun AboutScreen() {
                     ) {
                         FilledButton(
                             onClick = {
-                                showToast(
-                                    context = context,
-                                    message = "Funcionalidad sin implementar"
-                                )
+                                abrirPaginaWeb("https://shinyartplanet.etsy.com", context = context)
                             },
                             texto = "Ir al sitio web"
                         )
                         FilledButton(
                             onClick = {
-                                showToast(
-                                    context = context,
-                                    message = "Funcionalidad sin implementar"
-                                )
+                                mandarEmail(context, "cgarciaquintero@campusdigitalfp.es", context.getString(R.string
+                                    .incidencia_con_filmoteca))
                             },
                             texto = "Obtener soporte",
 
@@ -114,6 +111,21 @@ fun AboutScreen() {
 
 fun showToast(context: Context, message: String){
     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+}
+
+fun abrirPaginaWeb(url: String, context: Context){
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse(url)
+    }
+    context.startActivity(intent)
+}
+
+fun mandarEmail(context : Context, email : String, asunto: String){
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("mailto:$email")
+        putExtra(Intent.EXTRA_SUBJECT, asunto)
+    }
+    context.startActivity(intent)
 }
 
 
