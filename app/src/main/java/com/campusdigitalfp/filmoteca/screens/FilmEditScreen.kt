@@ -9,10 +9,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.campusdigitalfp.filmoteca.FilledButton
+import androidx.navigation.*
 
 @Composable
-fun filmEditScreen() {
+fun filmEditScreen(navController: NavHostController) {
 
     Scaffold {
         Column(
@@ -47,7 +47,7 @@ fun filmEditScreen() {
                     )
                     FilledButton(
                         onClick ={
-                            println("todo")
+                            navController.popBackStack()
                         },
                         texto = "Guardar",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -65,9 +65,4 @@ fun filmEditScreen() {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun FilmEditScreenPreview(){
-    filmEditScreen()
-}
 

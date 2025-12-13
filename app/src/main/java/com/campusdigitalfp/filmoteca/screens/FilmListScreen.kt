@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.campusdigitalfp.filmoteca.FilledButton
+import androidx.navigation.*
 
 @Composable
-fun filmListScreen() {
+fun filmListScreen(navController: NavHostController) {
 
     Scaffold {
         Column(
@@ -42,7 +42,7 @@ fun filmListScreen() {
                 ){
                     FilledButton(
                         onClick ={
-                            println("todo")
+                            navController.navigate("FilmDataScreen")
                         },
                         texto = "Ver película A",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -50,14 +50,14 @@ fun filmListScreen() {
                     )
                     FilledButton(
                         onClick ={
-                            println("todo")
+                            navController.navigate("FilmDataScreen")
                         },
                         texto = "Ver película B",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                     FilledButton(
                         onClick ={
-                            println("todo")
+                            navController.navigate("AboutScreen")
                         },
                         texto = "Acerca de",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -67,10 +67,4 @@ fun filmListScreen() {
             }
         }
     }
-}
-
-@Preview (showBackground = true)
-@Composable
-fun filmListScreenPreview(){
-    filmListScreen()
 }
