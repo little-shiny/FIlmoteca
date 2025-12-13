@@ -7,7 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 
@@ -47,14 +46,20 @@ fun filmEditScreen(navController: NavHostController) {
                     )
                     FilledButton(
                         onClick ={
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("editResult","RESULT_OK")
                             navController.popBackStack()
                         },
                         texto = "Guardar",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                     FilledButton(
-                        onClick ={
-                            println("todo")
+                        onClick = {
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("editResult", "RESULT_CANCELLED")
+                            navController.popBackStack()
                         },
                         texto = "Cancelar",
                         modifier = Modifier.align(Alignment.CenterHorizontally)

@@ -6,14 +6,27 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 
 @Composable
 fun filmDataScreen(navController: NavHostController, filmName: String?) {
+    // Estado para mostrar el resultado de si se ha editado o no
+    var editResult by remember { mutableStateOf("") }
+
+    val currentBackStackEntry = navController.currentBackStackEntry
+    currentBackStackEntry?.savedStateHandle
+        ?.getLiveData<String>("editResult")
+        ?.observe(currentBackStackEntry) {
+            result ->
+                editResult = result
+        }
+
+
 
     Scaffold {
         Column(
@@ -40,18 +53,20 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                     verticalArrangement = Arrangement.Center
                 ){
                     Text(
-                        text = "Película seleccionada: ",
+                        text = "Película seleccionada: ${filmName ?: "Sin película"}",
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .align(alignment = Alignment.CenterHorizontally)
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
-                    Text(
-                        text = filmName ?: "Sin película",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .align(alignment = Alignment.CenterHorizontally)
-                            .padding(20.dp)
-                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                    if (editResult.isNotEmpty()) {
+                        Text("Resultado edición: $editResult",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.align(Alignment.CenterHorizontally))
+
+                    }
+                    Spacer(modifier = Modifier.height(20.dp))
+
                     FilledButton(
                         onClick ={
                             navController.navigate("filmData/pelicula relacionada")
