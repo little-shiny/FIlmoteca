@@ -128,9 +128,6 @@ fun mandarEmail(context : Context, email : String, asunto: String){
     context.startActivity(intent)
 }
 
-
-
-
 @Composable
 fun FilledButton(
     onClick:  () -> Unit,

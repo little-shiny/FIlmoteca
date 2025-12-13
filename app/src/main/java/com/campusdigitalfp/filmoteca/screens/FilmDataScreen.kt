@@ -1,2 +1,82 @@
 package com.campusdigitalfp.filmoteca.screens
 
+
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.campusdigitalfp.filmoteca.FilledButton
+
+@Composable
+fun filmDataScreen() {
+
+    Scaffold {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Tarjeta principal
+            androidx.compose.material3.Card(
+                modifier = Modifier
+                    .padding(25.dp)
+                    .fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                elevation = androidx.compose.material3.CardDefaults.cardElevation(4.dp)
+            ) {
+
+                Column(
+                    modifier = Modifier
+                        .padding(25.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    Text(
+                        text = "Datos de la película",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                            .padding(20.dp)
+                    )
+                    FilledButton(
+                        onClick ={
+                            println("todo")
+                        },
+                        texto = "Ver película relacionada",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    FilledButton(
+                        onClick ={
+                            println("todo")
+                        },
+                        texto = "Editar película",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                    FilledButton(
+                        onClick ={
+                            println("todo")
+                        },
+                        texto = "Volver a la principal",
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FilmDataScreenPreview(){
+    filmDataScreen()
+}
+
