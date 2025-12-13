@@ -9,14 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun filmDataScreen(navController: NavHostController) {
+fun filmDataScreen(navController: NavHostController, filmName: String?) {
 
     Scaffold {
         Column(
@@ -43,7 +40,13 @@ fun filmDataScreen(navController: NavHostController) {
                     verticalArrangement = Arrangement.Center
                 ){
                     Text(
-                        text = "Datos de la película",
+                        text = "Película seleccionada: ",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier
+                            .align(alignment = Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = filmName ?: "Sin película",
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier
                             .align(alignment = Alignment.CenterHorizontally)
@@ -51,7 +54,7 @@ fun filmDataScreen(navController: NavHostController) {
                     )
                     FilledButton(
                         onClick ={
-                            navController.navigate("FilmDataScreen")
+                            navController.navigate("filmData/pelicula relacionada")
                         },
                         texto = "Ver película relacionada",
                         modifier = Modifier.align(Alignment.CenterHorizontally)
