@@ -19,12 +19,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.R
+import com.campusdigitalfp.filmoteca.common.barraSuperior
 
 @Composable
 fun AboutScreen(navController: NavHostController) {
     val context = LocalContext.current
 
-    Scaffold {
+    Scaffold (topBar = { barraSuperior(navController) }) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -90,10 +91,6 @@ fun AboutScreen(navController: NavHostController) {
             }
         }
     }
-}
-
-fun showToast(context: Context, message: String){
-    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 }
 
 fun abrirPaginaWeb(url: String, context: Context){

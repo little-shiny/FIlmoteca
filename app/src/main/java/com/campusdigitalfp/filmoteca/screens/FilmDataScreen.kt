@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.campusdigitalfp.filmoteca.common.barraSuperior
 
 @Composable
 fun filmDataScreen(navController: NavHostController, filmName: String?) {
@@ -26,9 +27,7 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                 editResult = result
         }
 
-
-
-    Scaffold {
+    Scaffold (topBar = { barraSuperior(navController)}){
         Column(
             modifier = Modifier
                 .fillMaxSize()

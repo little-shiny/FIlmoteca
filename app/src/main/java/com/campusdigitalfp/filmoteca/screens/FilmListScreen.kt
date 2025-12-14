@@ -9,11 +9,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
+import com.campusdigitalfp.filmoteca.common.barraSuperior
 
 @Composable
 fun filmListScreen(navController: NavHostController) {
 
-    Scaffold {
+    Scaffold(topBar = { barraSuperior(navController, false) }) {
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
