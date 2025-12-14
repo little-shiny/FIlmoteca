@@ -1,5 +1,6 @@
 package com.campusdigitalfp.filmoteca.screens
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -14,7 +15,19 @@ import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
 fun filmEditScreen(navController: NavHostController) {
 
-    Scaffold(topBar = { barraSuperior(navController) }){
+    Scaffold(
+        topBar = {
+            barraSuperior(
+                navController = navController,
+                atras = true,
+                onBackResult = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("result", Activity.RESULT_CANCELED)
+                }
+            )
+        }
+    ){
         Column(
             modifier = Modifier
                 .fillMaxSize()

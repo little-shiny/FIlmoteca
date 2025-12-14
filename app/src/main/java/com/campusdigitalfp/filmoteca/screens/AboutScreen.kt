@@ -24,7 +24,14 @@ import com.campusdigitalfp.filmoteca.common.barraSuperior
 fun AboutScreen(navController: NavHostController) {
     val context = LocalContext.current
 
-    Scaffold (topBar = { barraSuperior(navController) }) {
+    Scaffold (
+        topBar = {
+            barraSuperior(
+                navController = navController,
+                atras = true
+            )
+        }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

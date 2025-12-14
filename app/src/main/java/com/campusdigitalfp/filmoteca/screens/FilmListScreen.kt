@@ -14,7 +14,14 @@ import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
 fun filmListScreen(navController: NavHostController) {
 
-    Scaffold(topBar = { barraSuperior(navController, false) }) {
+    Scaffold(
+        topBar = {
+            barraSuperior(
+                navController = navController,
+                atras = false
+            )
+        }
+    ) {
 
         Column(
             modifier = Modifier

@@ -12,7 +12,12 @@ import androidx.navigation.NavHostController
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun barraSuperior(navController: NavHostController, atras: Boolean = true){
+fun barraSuperior(
+    navController: NavHostController,
+    atras: Boolean = true,
+    onBackResult: (() -> Unit)? = null //parámetro opcional que puede existir o no y solo se usa en filEditScreen
+
+){
     // TopAppBar
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -24,7 +29,11 @@ fun barraSuperior(navController: NavHostController, atras: Boolean = true){
         },
         navigationIcon = {
             if (atras) {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = {
+                    onBackResult?.invoke()
+                    navController.popBackStack()
+                }
+                ){
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Atrás"
@@ -32,6 +41,5 @@ fun barraSuperior(navController: NavHostController, atras: Boolean = true){
                 }
             }
         }
-
     )
 }

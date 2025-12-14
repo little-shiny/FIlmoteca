@@ -2,6 +2,7 @@ package com.campusdigitalfp.filmoteca.screens
 
 
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -17,17 +18,19 @@ import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
 fun filmDataScreen(navController: NavHostController, filmName: String?) {
     // Estado para mostrar el resultado de si se ha editado o no
-    var editResult by remember { mutableStateOf("") }
+    val editResult = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.get<Int>("result")
 
-    val currentBackStackEntry = navController.currentBackStackEntry
-    currentBackStackEntry?.savedStateHandle
-        ?.getLiveData<String>("editResult")
-        ?.observe(currentBackStackEntry) {
-            result ->
-                editResult = result
+    Scaffold (
+        topBar = {
+            barraSuperior(
+                navController = navController,
+                atras = true
+            )
         }
-
-    Scaffold (topBar = { barraSuperior(navController)}){
+    ){
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -57,8 +60,9 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                     Spacer(modifier = Modifier.height(20.dp))
-                    if (editResult.isNotEmpty()) {
-                        Text("Resultado edición: $editResult",
+
+                    if (editResult == Activity.RESULT_CANCELED) {
+                        Text("Edición cancelada",
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.align(Alignment.CenterHorizontally))
