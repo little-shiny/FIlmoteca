@@ -13,7 +13,10 @@ import androidx.navigation.navArgument
 fun Navigation(){
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "FilmListScreen"){
+    NavHost(navController = navController, startDestination = "MainScreen"){
+        composable("MainScreen"){
+            MainScreen(navController)
+        }
         composable("FilmListScreen"){
             filmListScreen(navController)
         }
