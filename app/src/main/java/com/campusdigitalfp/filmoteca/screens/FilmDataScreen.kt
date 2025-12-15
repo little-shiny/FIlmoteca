@@ -3,6 +3,10 @@ package com.campusdigitalfp.filmoteca.screens
 
 
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -10,11 +14,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.barraSuperior
-
 @Composable
 fun filmDataScreen(navController: NavHostController, filmName: String?) {
     // Estado para mostrar el resultado de si se ha editado o no
@@ -22,80 +30,145 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
         .currentBackStackEntry
         ?.savedStateHandle
         ?.get<Int>("result")
+    val context = LocalContext.current
 
-    Scaffold (
+    Scaffold(
         topBar = {
             barraSuperior(
                 navController = navController,
                 atras = true
             )
         }
-    ){
+    ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Tarjeta principal
-            androidx.compose.material3.Card(
+                .padding(
+                    top = innerPadding.calculateTopPadding(),
+                    start = 16.dp,
+                    end = 16.dp,
+                    bottom = 16.dp
+                )
+        ){
+            //Imagen y título
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
-                    .padding(25.dp)
-                    .fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                elevation = androidx.compose.material3.CardDefaults.cardElevation(4.dp)
+                    .fillMaxWidth()
             ) {
-
-                Column(
+                Image(
+                    painter = painterResource(id = R.drawable.film),
+                    contentDescription = "Imagen de la película",
                     modifier = Modifier
-                        .padding(25.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ){
+                        .padding(top = 16.dp)
+                        .size(120.dp)
+                )
+                Column {
                     Text(
-                        text = "Película seleccionada: ${filmName ?: "Sin película"}",
+                        text = filmName ?: "Sin película",
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 20.dp)
                     )
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    if (editResult == Activity.RESULT_CANCELED) {
-                        Text("Edición cancelada",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally))
-
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    FilledButton(
-                        onClick ={
-                            navController.navigate("filmData/pelicula relacionada")
-                        },
-                        texto = "Ver película relacionada",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    Text(
+                        text = "Director:",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    FilledButton(
-                        onClick ={
-                            navController.navigate("FilmEditScreen")
-                        },
-                        texto = "Editar película",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    Text(
+                        text = "Peter Jackson:",
+                        style = MaterialTheme.typography.bodyLarge
                     )
-                    FilledButton(
-                        onClick ={
-                            navController.navigate("FilmListScreen"){
-                                popUpTo("FilmListScreen"){ inclusive = true }
-                            }
-                        },
-                        texto = "Volver a la principal",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    Text(
+                        text = "Año:",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "2001:",
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
+
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+            if (editResult == Activity.RESULT_CANCELED) {
+                Text(
+                    "Edición cancelada",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+            Text(
+                text = "Género:",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(20.dp)
+            )
+            Text(
+                text = "Formato:",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .padding(20.dp)
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            FilledButton(
+                onClick = {
+                    abrirEnIMDB("https://www.imdb.com/es-es/title/tt0120737/?ref_=ext_shr_lnk" , context)
+                },
+                texto = "Ver en IMDB",
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth(),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+
+            ){
+                FilledButton(
+                    onClick = {
+                        navController.navigate("FilmEditScreen")
+                    },
+                    texto = "Editar",
+                    modifier = Modifier.weight(1f)
+
+                )
+                FilledButton(
+                    onClick = {
+                        navController.navigate("FilmListScreen") {
+                            popUpTo("FilmListScreen") { inclusive = true }
+                        }
+                    },
+                    texto = "Volver",
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
 }
+
+fun abrirEnIMDB(url: String, context: Context){
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse(url)
+    }
+    context.startActivity(intent)
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FilmDataScreenPreview() {
+    val navController = rememberNavController()
+
+    filmDataScreen(
+        navController = navController,
+        filmName = "El Señor de los Anillos"
+    )
+}
+
 
