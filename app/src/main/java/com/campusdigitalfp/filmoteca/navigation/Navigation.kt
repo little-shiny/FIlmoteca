@@ -24,17 +24,18 @@ fun Navigation(){
             AboutScreen(navController)
         }
         // Pantalla FilmDataScreen con parámetro
+        // **Ahora index para poder navegar por el array de las peliculas**
         composable(
-            route = "filmData/{filmName}",
+            route = "filmData/{filmIndex}",
             arguments = listOf(
-                navArgument("filmName"){
-                    type = NavType.StringType
+                navArgument("filmIndex"){
+                    type = NavType.IntType
                 }
             )
         ){ backStackEntry ->
-            val filmName =
-                backStackEntry.arguments?.getString("filmName")
-            filmDataScreen(navController, filmName)
+            val index =
+                backStackEntry.arguments?.getInt("filmIndex")
+            filmDataScreen(navController, index)
         }
     }
 }

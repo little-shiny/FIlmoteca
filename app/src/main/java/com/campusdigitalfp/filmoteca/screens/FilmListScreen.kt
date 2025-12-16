@@ -4,7 +4,7 @@ package com.campusdigitalfp.filmoteca.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
 import androidx.navigation.compose.rememberNavController
+import com.campusdigitalfp.filmoteca.common.Film
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 
@@ -55,15 +56,22 @@ fun filmListScreen(navController: NavHostController) {
                         bottom = innerPadding.calculateBottomPadding()
                     )
             ) {
-                items(FilmDataSource.films){
-                    film -> FilmCard(film = film)
+                itemsIndexed(FilmDataSource.films){
+                    index,
+                    film ->
+                        FilmCard(
+                            film = film,
+                            onClick ={
+                                navController.navigate("FilmDataScreen/$index")
+                            }
+                        )
                 }
             }
         }
     }
 }
 @Composable
-fun FilmCard(film:com.campusdigitalfp.filmoteca.common.Film){
+fun FilmCard(film: Film, onClick: () -> Unit){
     Card(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -115,10 +123,3 @@ fun filmListScreenPreview(){
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun FilmCardPreview(){
-    val film = FilmDataSource.films[1]
-    FilmCard(film = film)
-
-}

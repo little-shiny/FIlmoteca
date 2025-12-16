@@ -22,15 +22,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.campusdigitalfp.filmoteca.R
+import com.campusdigitalfp.filmoteca.common.FilmDataSource
+import com.campusdigitalfp.filmoteca.common.FilmDataSource.films
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
-fun filmDataScreen(navController: NavHostController, filmName: String?) {
+fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
     // Estado para mostrar el resultado de si se ha editado o no
     val editResult = navController
         .currentBackStackEntry
         ?.savedStateHandle
         ?.get<Int>("result")
     val context = LocalContext.current
+
+    val film = filmIndex?.let { FilmDataSource.films[it] }
 
     Scaffold(
         topBar = {
@@ -40,6 +44,14 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
             )
         }
     ) { innerPadding ->
+        // Si no se encuentran los datos o no se pueden leer
+        if(film == null){
+            Text("Película no encontrada")
+            return@Scaffold
+        }
+
+        //else
+
         Column(
             modifier = Modifier
                 .padding(
@@ -63,8 +75,9 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                         .size(120.dp)
                 )
                 Column {
+                    //Titulo
                     Text(
-                        text = filmName ?: "Sin película",
+                        text = film.title ?: "Sin título",
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 20.dp)
@@ -74,8 +87,9 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    //Autor
                     Text(
-                        text = "Peter Jackson:",
+                        text = film.director ?: "Desconocido",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -83,8 +97,9 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    //Año
                     Text(
-                        text = "2001:",
+                        text = film.year.toString(),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -101,14 +116,14 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                 )
             }
             Text(
-                text = "Género:",
+                text = "Género: ${film.genre}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(20.dp)
             )
             Text(
-                text = "Formato:",
+                text = "Formato: ${film.format}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -118,7 +133,7 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
 
             FilledButton(
                 onClick = {
-                    abrirEnIMDB("https://www.imdb.com/es-es/title/tt0120737/?ref_=ext_shr_lnk" , context)
+                    abrirEnIMDB(film.imdbUrl ?: "", context)
                 },
                 texto = "Ver en IMDB",
                 modifier = Modifier
@@ -133,7 +148,7 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
             ){
                 FilledButton(
                     onClick = {
-                        navController.navigate("FilmEditScreen")
+                        navController.navigate("FilmEditScreen/$filmIndex")
                     },
                     texto = "Editar",
                     modifier = Modifier.weight(1f)
@@ -160,15 +175,6 @@ fun abrirEnIMDB(url: String, context: Context){
     context.startActivity(intent)
 }
 
-@Preview(showBackground = true)
-@Composable
-fun FilmDataScreenPreview() {
-    val navController = rememberNavController()
 
-    filmDataScreen(
-        navController = navController,
-        filmName = "El Señor de los Anillos"
-    )
-}
 
 
