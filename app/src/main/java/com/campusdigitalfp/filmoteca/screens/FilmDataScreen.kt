@@ -36,6 +36,8 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
 
     val film = filmIndex?.let { FilmDataSource.films[it] }
 
+    val generoList = context.resources.getStringArray(R.array.genero_list).toList()
+
     Scaffold(
         topBar = {
             barraSuperior(
@@ -116,18 +118,18 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
                 )
             }
             Text(
-                text = "Género: ${film.genre}",
+                text = "Género: ${film.genreToString()}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(10.dp)
             )
             Text(
-                text = "Formato: ${film.format}",
+                text = "Formato: ${film.formatToString()}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(10.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
 

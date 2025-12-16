@@ -1,6 +1,7 @@
 package com.campusdigitalfp.filmoteca.screens
 
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -62,7 +63,7 @@ fun filmListScreen(navController: NavHostController) {
                         FilmCard(
                             film = film,
                             onClick ={
-                                navController.navigate("FilmDataScreen/$index")
+                                navController.navigate("FilmData/$index")
                             }
                         )
                 }
@@ -73,11 +74,13 @@ fun filmListScreen(navController: NavHostController) {
 @Composable
 fun FilmCard(film: Film, onClick: () -> Unit){
     Card(
+        onClick = onClick,
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(4.dp)
+
 
     ){
         Row (

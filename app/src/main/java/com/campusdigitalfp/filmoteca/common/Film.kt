@@ -11,6 +11,27 @@ data class Film(
     var imdbUrl: String? = null,
     var comments: String? = null
 ) {
+    //Funcion implementada para traducir el indice Int del genero y formato a una string
+    fun genreToString(): String {
+        return when (genre) {
+            GENRE_ACTION -> "Acción"
+            GENRE_COMEDY -> "Comedia"
+            GENRE_DRAMA -> "Drama"
+            GENRE_SCIFI -> "Ciencia ficción"
+            GENRE_HORROR -> "Terror"
+            else -> "Desconocido"
+        }
+    }
+    //lo mismo con el formato
+    fun formatToString(): String {
+        return when (format) {
+            FORMAT_DIGITAL -> "Digital"
+            FORMAT_BLURAY -> "Blu-Ray"
+            FORMAT_DVD -> "DVD"
+            else -> "Desconocido"
+        }
+    }
+
     override fun toString(): String {
         // Al convertir a cadena mostramos su título
         return title ?: "<Sin título>"
