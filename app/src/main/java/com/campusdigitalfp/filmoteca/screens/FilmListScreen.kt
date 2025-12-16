@@ -1,14 +1,21 @@
 package com.campusdigitalfp.filmoteca.screens
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.*
+import androidx.navigation.compose.rememberNavController
+import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 
 @Composable
@@ -20,56 +27,98 @@ fun filmListScreen(navController: NavHostController) {
                 navController = navController,
                 atras = false
             )
-        }
-    ) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Tarjeta principal
-            androidx.compose.material3.Card(
+        },
+        // He añadido un BottomBar para que el boton "acerca de" permanezca anclado pero permita que se visaulice
+        // correctamente el último elemento de la LazyColumn
+        bottomBar = {
+            Box(
                 modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                elevation = androidx.compose.material3.CardDefaults.cardElevation(4.dp)
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ){
+                FilledButton(
+                    onClick ={
+                        navController.navigate("AboutScreen")
+                    },
+                    texto = "Acerca de",
+                )
+            }
+        }
+    ){innerPadding ->
+        Column{
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = innerPadding.calculateTopPadding(),
+                        bottom = innerPadding.calculateBottomPadding()
+                    )
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ){
-                    FilledButton(
-                        onClick ={
-                            navController.navigate("filmData/Pelicula A")
-                        },
-                        texto = "Ver película A",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-
-                    )
-                    FilledButton(
-                        onClick ={
-                            navController.navigate("filmData/Pelicula B")
-                        },
-                        texto = "Ver película B",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                    FilledButton(
-                        onClick ={
-                            navController.navigate("AboutScreen")
-                        },
-                        texto = "Acerca de",
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
+                items(FilmDataSource.films){
+                    film -> FilmCard(film = film)
                 }
-
             }
         }
     }
+}
+@Composable
+fun FilmCard(film:com.campusdigitalfp.filmoteca.common.Film){
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        elevation = CardDefaults.cardElevation(4.dp)
+
+    ){
+        Row (
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            //Imagen de la pelicula
+            if(film.imageResId !=0){
+                Image(
+                    painter = painterResource(id = film.imageResId),
+                    contentDescription = film.title,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .padding(top = 7.dp, end = 16.dp , bottom = 7.dp)
+                )
+            }
+            // Column con la información
+            Column {
+                Text(
+                    text = film.title ?: "<Sin Título>",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = film.director ?: "<Sin Director>",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun filmListScreenPreview(){
+    val navController = rememberNavController()
+    filmListScreen(
+        navController = navController
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FilmCardPreview(){
+    val film = FilmDataSource.films[1]
+    FilmCard(film = film)
+
 }
