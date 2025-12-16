@@ -1,7 +1,5 @@
 package com.campusdigitalfp.filmoteca.screens
 
-
-
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -17,13 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
-import com.campusdigitalfp.filmoteca.common.FilmDataSource.films
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
 fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
@@ -35,8 +30,6 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
     val context = LocalContext.current
 
     val film = filmIndex?.let { FilmDataSource.films[it] }
-
-    val generoList = context.resources.getStringArray(R.array.genero_list).toList()
 
     Scaffold(
         topBar = {
@@ -150,7 +143,7 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
             ){
                 FilledButton(
                     onClick = {
-                        navController.navigate("FilmEditScreen/$filmIndex")
+                        navController.navigate("FilmEdit/$filmIndex")
                     },
                     texto = "Editar",
                     modifier = Modifier.weight(1f)

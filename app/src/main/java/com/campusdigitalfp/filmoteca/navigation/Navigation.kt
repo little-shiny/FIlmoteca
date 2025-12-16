@@ -17,8 +17,14 @@ fun Navigation(){
         composable("FilmListScreen"){
             filmListScreen(navController)
         }
-        composable("FilmEditScreen"){
-            filmEditScreen(navController)
+        composable(
+            route = "filmEdit/{filmIndex}",
+            arguments = listOf(
+                navArgument("filmIndex"){type = NavType.IntType}
+            )
+        ){ backStackEntry ->
+            val index = backStackEntry.arguments?.getInt("FilmIndex")
+            filmEditScreen(navController, index)
         }
         composable("AboutScreen"){
             AboutScreen(navController)
