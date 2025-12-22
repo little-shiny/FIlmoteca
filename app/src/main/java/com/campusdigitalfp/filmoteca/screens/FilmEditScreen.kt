@@ -1,9 +1,7 @@
 package com.campusdigitalfp.filmoteca.screens
 
 import android.app.Activity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,50 +9,61 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.campusdigitalfp.filmoteca.R
+import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 
 @Composable
-fun filmEditScreen(navController: NavHostController) {
-    var titulo by remember { mutableStateOf("") }
-    var director by remember { mutableStateOf("") }
-    var anyo by remember { mutableIntStateOf(1997) }
-    var url by remember { mutableStateOf("") }
-    //var imagen by remember { mutableIntStateOf("") }
-    var comentarios by remember { mutableStateOf("") }
+fun filmEditScreen(navController: NavHostController, filmIndex: Int?) {
 
-    var expandedGenero by remember { mutableStateOf(false) }
-    var expandedFormato by remember { mutableStateOf(false) }
+    //Recuperamos la pelicula
+    val film = filmIndex?.let { FilmDataSource.films[it] }
 
+    // Validacion por si el indice es incorrecto
+    if (film == null) {
+        Scaffold(
+            topBar = {
+                barraSuperior(navController = navController, atras = true)
+            }
+        ) {
+            Text(
+                text = "Película no encontrada",
+                modifier = Modifier
+                    .padding(16.dp)
+            )
+        }
+        return
+    }
+
+    //cargamos los datos en las variables
+    var titulo by remember { mutableStateOf(film.title ?: "") }
+    var director by remember { mutableStateOf(film.director ?: "") }
+    var anyo by remember { mutableIntStateOf(film.year) }
+    var url by remember { mutableStateOf(film.imdbUrl ?: "") }
+    var comentarios by remember { mutableStateOf(film.comments ?: "") }
+
+    var genero by remember { mutableIntStateOf(film.genre) }
+    var formato by remember { mutableIntStateOf(film.format) }
+
+    // Dropdowns
     val context = LocalContext.current
     val generoList = context.resources.getStringArray(R.array.genero_list).toList()
     val formatoList = context.resources.getStringArray(R.array.formato_list).toList()
-
-
-    var genero by remember { mutableIntStateOf(0) }
-    var formato by remember { mutableIntStateOf(1) }
+    var expandedGenero by remember { mutableStateOf(false) }
+    var expandedFormato by remember { mutableStateOf(false) }
 
 
     Scaffold(
         topBar = {
             barraSuperior(
                 navController = navController,
-                atras = true,
-                onBackResult = {
-                    navController.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("result", Activity.RESULT_CANCELED)
-                }
+                atras = true
             )
         }
     ) { innerPadding ->
@@ -66,158 +75,101 @@ fun filmEditScreen(navController: NavHostController) {
                     start = 16.dp,
                     end = 16.dp,
                     bottom = 16.dp
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-
+                )
         ) {
-            Spacer(Modifier.padding(5.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-
-            ){
-                Image(
-                    painter = painterResource(R.drawable.film),
-                    contentDescription = "Imagen de la película",
-                    modifier = Modifier
-                        .size(70.dp)
-                        .weight(1f)
-                )
-                FilledButton(
-                    onClick = {
-
-                    },
-                    texto = "Capturar fotografía",
-                    modifier = Modifier.weight(2f)
-                )
-                FilledButton(
-                    onClick = {
-
-                    },
-                    texto = "Seleccionar imagen",
-                    modifier = Modifier.weight(2f)
-                )
-            }
-            Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.height(8.dp))
+            // Campos de texto
             TextField(
                 value = titulo,
-                onValueChange = {newTitulo -> titulo = newTitulo},
-                label = {Text("Título")},
-                placeholder = {Text("Título de la película")},
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Sentences
-                )
+                onValueChange = { titulo = it },
+                label = { Text("Título") },
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.height(8.dp))
             TextField(
                 value = director,
-                onValueChange = {newText -> director = newText},
-                label = {Text("Director")},
-                placeholder = {Text("Director de la película")},
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Sentences
-                )
+                onValueChange = { director = it },
+                label = { Text("Director") },
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.height(8.dp))
             TextField(
                 value = anyo.toString(),
-                onValueChange = { newText ->
-                    val number = newText.toIntOrNull()
-                    if(number != null){
-                        anyo = number
-                    }
-                },
+                onValueChange = { anyo = it.toIntOrNull() ?: anyo },
                 label = { Text("Año") },
-                placeholder = { Text("Ej: 1997") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.height(8.dp))
             TextField(
                 value = url,
-                onValueChange = { newText -> url = newText
-                },
-                label = { Text("Url a IMDB") },
-                placeholder = { Text("Enlace a IMDB") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Sentences
-                    )
+                onValueChange = { url = it },
+                label = { Text("URL IMDb") },
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.height(8.dp))
             GenericSpinnerDropdown(
                 items = generoList,
                 selectedIndex = genero,
-                onItemSelected = { genero = it},
+                onItemSelected = { genero = it },
                 expanded = expandedGenero,
-                onExpandedChange = {expandedGenero = it},
-                label = "Seleccione el género"
+                onExpandedChange = { expandedGenero = it },
+                label = "Género"
             )
-            Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.height(8.dp))
             GenericSpinnerDropdown(
                 items = formatoList,
                 selectedIndex = formato,
-                onItemSelected = { formato = it},
+                onItemSelected = { formato = it },
                 expanded = expandedFormato,
-                onExpandedChange = {expandedFormato = it},
-                label = "Seleccione el formato"
+                onExpandedChange = { expandedFormato = it },
+                label = "Formato"
             )
-            Spacer(Modifier.padding(5.dp))
+            Spacer(Modifier.height(8.dp))
             TextField(
                 value = comentarios,
-                onValueChange = { newText -> comentarios = newText
-                },
+                onValueChange = { comentarios = it },
                 label = { Text("Comentarios") },
-                placeholder = { Text("Comentarios") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Sentences
-                )
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.padding(5.dp))
-            Row (
+            Spacer(Modifier.height(16.dp))
+
+            // Botones
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ){
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 FilledButton(
                     onClick = {
+                        // Guardar cambios directamente en FilmDataSource
+                        film.title = titulo
+                        film.director = director
+                        film.year = anyo
+                        film.imdbUrl = url
+                        film.comments = comentarios
+                        film.genre = genero
+                        film.format = formato
+
+                        // Devolver resultado a la pantalla anterior
                         navController.previousBackStackEntry
                             ?.savedStateHandle
-                            ?.set("editResult", "RESULT_OK")
+                            ?.set("result", Activity.RESULT_OK)
+
                         navController.popBackStack()
                     },
-                    texto = "Guardar",
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = Modifier.weight(1f),
+                    texto = "Guardar"
                 )
                 FilledButton(
                     onClick = {
                         navController.previousBackStackEntry
                             ?.savedStateHandle
-                            ?.set("editResult", "RESULT_CANCELLED")
+                            ?.set("result", Activity.RESULT_CANCELED)
                         navController.popBackStack()
                     },
-                    texto = "Cancelar",
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = Modifier.weight(1f),
+                    texto = "Cancelar"
                 )
             }
-
-
         }
     }
 }
@@ -277,7 +229,8 @@ fun FilmEditScreenPreview(){
     val navController = rememberNavController()
 
     filmEditScreen(
-        navController = navController
+        navController = navController,
+        filmIndex = 1
         )
 }
 

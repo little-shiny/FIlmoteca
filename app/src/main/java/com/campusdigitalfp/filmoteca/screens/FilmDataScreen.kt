@@ -1,7 +1,5 @@
 package com.campusdigitalfp.filmoteca.screens
 
-
-
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -17,20 +15,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.campusdigitalfp.filmoteca.R
+import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
-fun filmDataScreen(navController: NavHostController, filmName: String?) {
+fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
     // Estado para mostrar el resultado de si se ha editado o no
     val editResult = navController
         .currentBackStackEntry
         ?.savedStateHandle
         ?.get<Int>("result")
     val context = LocalContext.current
+
+    val film = filmIndex?.let { FilmDataSource.films[it] }
 
     Scaffold(
         topBar = {
@@ -40,6 +38,14 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
             )
         }
     ) { innerPadding ->
+        // Si no se encuentran los datos o no se pueden leer
+        if(film == null){
+            Text("Película no encontrada")
+            return@Scaffold
+        }
+
+        //else
+
         Column(
             modifier = Modifier
                 .padding(
@@ -56,17 +62,18 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                     .fillMaxWidth()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.film),
+                    painter = painterResource(id = film.imageResId),
                     contentDescription = "Imagen de la película",
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .size(120.dp)
                 )
                 Column {
+                    //Titulo
                     Text(
-                        text = filmName ?: "Sin película",
+                        text = film.title ?: "Sin título",
                         style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Left,
                         modifier = Modifier.padding(top = 20.dp)
                     )
                     Text(
@@ -74,8 +81,9 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    //Autor
                     Text(
-                        text = "Peter Jackson:",
+                        text = film.director ?: "Desconocido",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -83,8 +91,9 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
+                    //Año
                     Text(
-                        text = "2001:",
+                        text = film.year.toString(),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -101,24 +110,24 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
                 )
             }
             Text(
-                text = "Género:",
+                text = "Género: ${film.genreToString()}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(10.dp)
             )
             Text(
-                text = "Formato:",
+                text = "Formato: ${film.formatToString()}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .padding(20.dp)
+                    .padding(10.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
 
             FilledButton(
                 onClick = {
-                    abrirEnIMDB("https://www.imdb.com/es-es/title/tt0120737/?ref_=ext_shr_lnk" , context)
+                    abrirEnIMDB(film.imdbUrl ?: "", context)
                 },
                 texto = "Ver en IMDB",
                 modifier = Modifier
@@ -133,7 +142,7 @@ fun filmDataScreen(navController: NavHostController, filmName: String?) {
             ){
                 FilledButton(
                     onClick = {
-                        navController.navigate("FilmEditScreen")
+                        navController.navigate("FilmEdit/$filmIndex")
                     },
                     texto = "Editar",
                     modifier = Modifier.weight(1f)
@@ -160,15 +169,6 @@ fun abrirEnIMDB(url: String, context: Context){
     context.startActivity(intent)
 }
 
-@Preview(showBackground = true)
-@Composable
-fun FilmDataScreenPreview() {
-    val navController = rememberNavController()
 
-    filmDataScreen(
-        navController = navController,
-        filmName = "El Señor de los Anillos"
-    )
-}
 
 
