@@ -21,7 +21,7 @@ object FilmDataSource {
 
         // Segunda película: Regreso al futuro
         val f2 = Film()
-        f1.id = films.size
+        f2.id = films.size
         f2.title = "Regreso al futuro"
         f2.director = "Robert Zemeckis"
         f2.imageResId = R.drawable.regreso_al_futuro
@@ -34,7 +34,7 @@ object FilmDataSource {
 
         // Tercera película: El rey león
         val f3 = Film()
-        f1.id = films.size
+        f3.id = films.size
         f3.title = "El rey león"
         f3.director = "Roger Allers, Rob Minkoff"
         f3.imageResId = R.drawable.el_rey_leon
@@ -44,6 +44,19 @@ object FilmDataSource {
         f3.imdbUrl = "http://www.imdb.com/title/tt0110357"
         f3.year = 1994
         films.add(f3)
+
+
+        val f4 = Film()
+        f4.id = films.size
+        f4.title = "Kimetsu no Yaiba: Mugen-jō-hen"
+        f4.director = "Haruo Sotozaki"
+        f4.imageResId = R.drawable.guardianes
+        f4.comments = "Guardianes de la noche: Tren infinito"
+        f4.format = Film.FORMAT_DIGITAL
+        f4.genre = Film.GENRE_ACTION // Cambia según corresponda
+        f4.imdbUrl = "www.imdb.com/es-es/title/tt32820897/?reasonForLanguagePrompt=browser_header_mismatch"
+        f4.year = 2025
+        films.add(f4)
 
         // Añade más películas si deseas!
     }

@@ -1,38 +1,52 @@
 package com.campusdigitalfp.filmoteca.screens
 
-
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.*
 import androidx.navigation.compose.rememberNavController
 import com.campusdigitalfp.filmoteca.common.Film
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
+import com.campusdigitalfp.filmoteca.common.FilmViewModel
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 
 @Composable
 fun filmListScreen(navController: NavHostController) {
 
+    val viewModel: FilmViewModel = viewModel()
+
     Scaffold(
         topBar = {
             barraSuperior(
                 navController = navController,
-                atras = false
+                atras = false,
+                menu = true,
+                onAddFilm = {
+                    //Se añade la película por defecto a la lista
+                    val newFilm = viewModel.addDefaultFilm()
+                    // navegar por el ID de la película en el array
+                    navController.navigate("filmEdit/${newFilm.id}")
+                },
+                onAbout = {
+                    navController.navigate("AboutScreen")
+                }
             )
         },
+
+        // **Se quita esta parte por implementación del IconButton**
         // He añadido un BottomBar para que el boton "acerca de" permanezca anclado pero permita que se visaulice
         // correctamente el último elemento de la LazyColumn
-        bottomBar = {
+
+        /*bottomBar = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -46,7 +60,8 @@ fun filmListScreen(navController: NavHostController) {
                     texto = "Acerca de",
                 )
             }
-        }
+        }*/
+
     ){innerPadding ->
         Column{
             LazyColumn(
@@ -63,6 +78,7 @@ fun filmListScreen(navController: NavHostController) {
                         FilmCard(
                             film = film,
                             onClick ={
+                                // Navegar usando el índice de la película en la lista
                                 navController.navigate("FilmData/$index")
                             }
                         )
@@ -104,7 +120,8 @@ fun FilmCard(film: Film, onClick: () -> Unit){
                 Text(
                     text = film.title ?: "<Sin Título>",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+
                 )
                 Text(
                     text = film.director ?: "<Sin Director>",

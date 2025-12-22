@@ -17,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
@@ -63,7 +62,7 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
                     .fillMaxWidth()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.film),
+                    painter = painterResource(id = film.imageResId),
                     contentDescription = "Imagen de la película",
                     modifier = Modifier
                         .padding(top = 16.dp)
@@ -74,7 +73,7 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
                     Text(
                         text = film.title ?: "Sin título",
                         style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Left,
                         modifier = Modifier.padding(top = 20.dp)
                     )
                     Text(

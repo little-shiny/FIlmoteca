@@ -17,13 +17,14 @@ fun Navigation(){
         composable("FilmListScreen"){
             filmListScreen(navController)
         }
+        // composable para crear una ruta edit/x donde x es el parametro de la posicion literal del array
         composable(
             route = "filmEdit/{filmIndex}",
             arguments = listOf(
                 navArgument("filmIndex"){type = NavType.IntType}
             )
         ){ backStackEntry ->
-            val index = backStackEntry.arguments?.getInt("FilmIndex")
+            val index = backStackEntry.arguments?.getInt("filmIndex")
             filmEditScreen(navController, index)
         }
         composable("AboutScreen"){
