@@ -3,30 +3,23 @@ package com.campusdigitalfp.filmoteca.screens
 import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 
 @Composable
-fun filmEditScreen(navController: NavHostController, filmIndex: Int?) {
+fun filmEditScreen(navController: NavHostController, filmId: Int?) {
 
-    //Recuperamos la pelicula
-    val film = filmIndex?.let { FilmDataSource.films[it] }
+    //Recuperamos la pelicula por id
+    val film = FilmDataSource.films.firstOrNull { it.id == filmId}
 
-    // Validacion por si el indice es incorrecto
-    if (film == null) {
+    // Validar filmId nulo
+    if (filmId == null || film == null) {
         Scaffold(
             topBar = {
                 barraSuperior(navController = navController, esHome = false, atras = true)
@@ -223,14 +216,4 @@ fun <T> GenericSpinnerDropdown(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun FilmEditScreenPreview(){
-    val navController = rememberNavController()
-
-    filmEditScreen(
-        navController = navController,
-        filmIndex = 1
-        )
-}
 
