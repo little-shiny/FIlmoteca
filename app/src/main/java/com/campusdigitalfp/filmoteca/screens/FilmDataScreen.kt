@@ -17,10 +17,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 @Composable
-fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
+fun filmDataScreen(navController: NavHostController, filmId: Int?) {
     // Estado para mostrar el resultado de si se ha editado o no
     val editResult = navController
         .currentBackStackEntry
@@ -28,7 +29,7 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
         ?.get<Int>("result")
     val context = LocalContext.current
 
-    val film = filmIndex?.let { FilmDataSource.films[it] }
+    val film = FilmDataSource.films.firstOrNull { it.id == filmId }
 
     Scaffold(
         topBar = {
@@ -39,14 +40,6 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
             )
         }
     ) { innerPadding ->
-        // Si no se encuentran los datos o no se pueden leer
-        if(film == null){
-            Text("Película no encontrada")
-            return@Scaffold
-        }
-
-        //else
-
         Column(
             modifier = Modifier
                 .padding(
@@ -56,6 +49,16 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
                     bottom = 16.dp
                 )
         ){
+            // Si no se encuentran los datos o no se pueden leer
+            if(film == null){
+                Text("Película no encontrada")
+                return@Scaffold
+            }
+
+            // Imagen que no da error al modificar la lista de peliculas
+            val imageRes = if(film.imageResId != 0)
+                film.imageResId else R.drawable.film // Imagen por defecto si no hay
+
             //Imagen y título
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -63,7 +66,7 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
                     .fillMaxWidth()
             ) {
                 Image(
-                    painter = painterResource(id = film.imageResId),
+                    painter = painterResource(id = imageRes),
                     contentDescription = "Imagen de la película",
                     modifier = Modifier
                         .padding(top = 16.dp)
@@ -143,7 +146,7 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
             ){
                 FilledButton(
                     onClick = {
-                        navController.navigate("FilmEdit/$filmIndex")
+                        navController.navigate("FilmEdit/$filmId")
                     },
                     texto = "Editar",
                     modifier = Modifier.weight(1f)

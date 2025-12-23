@@ -159,17 +159,49 @@ fun FilmCard(
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            //Imagen de la pelicula
-            if(film.imageResId !=0){
-                Image(
-                    painter = painterResource(id = film.imageResId),
-                    contentDescription = film.title,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .size(100.dp)
-                        .padding(top = 7.dp, end = 16.dp , bottom = 7.dp)
-                )
+            //Imagen de la pelicula o icono del check:
+            // Se usa Box para poder cambiar la imagen y el icono. Si estamos en modo seleccion multiple se muestran
+            // los iconos del check, si no, se muestra la imagen de la película
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .padding(
+                        top = 7.dp,
+                        end = 16.dp,
+                        bottom = 7.dp
+                    )
+            ){
+                if(isActionMode){
+                    if (isSelected){
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Seleccionado",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.fillMaxSize()
+
+                        )
+                    }else{
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "No seleccionado",
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                } else {
+                    if(film.imageResId !=0){
+                        Image(
+                            painter = painterResource(id = film.imageResId),
+                            contentDescription = film.title,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .padding(top = 7.dp, end = 16.dp , bottom = 7.dp)
+                        )
+                    }
+                }
             }
+
             // Column con la información
             Column {
                 Text(
@@ -182,16 +214,6 @@ fun FilmCard(
                     text = film.director ?: "<Sin Director>",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            // Hacemos que al estar seleccionado un elemento se muestre el icono del check
-            if(isActionMode){
-                Icon(
-                    imageVector = if(isSelected)
-                        Icons.Default.CheckCircle
-                    else
-                        Icons.Default.Check,
-                    contentDescription = "Seleccionado"
                 )
             }
         }
