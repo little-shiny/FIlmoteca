@@ -1,7 +1,6 @@
 package com.campusdigitalfp.filmoteca.screens
 
 import android.app.Activity
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -11,10 +10,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
+import com.campusdigitalfp.filmoteca.common.Logger
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 
+private const val TAG = "FilmEditScreen"
 @Composable
 fun filmEditScreen(navController: NavHostController, filmId: Int?) {
+
+    val context = LocalContext.current
 
     //Recuperamos la pelicula por id
     val film = FilmDataSource.films.firstOrNull { it.id == filmId}
@@ -32,6 +35,8 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                     .padding(16.dp)
             )
         }
+        // Log de error
+        Logger.log(context,TAG,"Película no encontrada para filmId=$filmId")
         return
     }
 
@@ -46,7 +51,6 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
     var formato by remember { mutableIntStateOf(film.format) }
 
     // Dropdowns
-    val context = LocalContext.current
     val generoList = context.resources.getStringArray(R.array.genero_list).toList()
     val formatoList = context.resources.getStringArray(R.array.formato_list).toList()
     var expandedGenero by remember { mutableStateOf(false) }
@@ -75,28 +79,40 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
             // Campos de texto
             TextField(
                 value = titulo,
-                onValueChange = { titulo = it },
+                onValueChange = {
+                    titulo = it
+                    Logger.log(context, TAG, "Título cambiado a: $it")
+                },
                 label = { Text("Título") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
             TextField(
                 value = director,
-                onValueChange = { director = it },
+                onValueChange = {
+                    director = it
+                    Logger.log(context, TAG, "Director cambiado a: $it")
+                },
                 label = { Text("Director") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
             TextField(
                 value = anyo.toString(),
-                onValueChange = { anyo = it.toIntOrNull() ?: anyo },
+                onValueChange = {
+                    anyo = it.toIntOrNull() ?: anyo
+                    Logger.log(context, TAG, "Año cambiado a: $anyo")
+                },
                 label = { Text("Año") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
             TextField(
                 value = url,
-                onValueChange = { url = it },
+                onValueChange = {
+                    url = it
+                    Logger.log(context, TAG, "URL IMDb cambiada a: $it")
+                },
                 label = { Text("URL IMDb") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -104,7 +120,10 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
             GenericSpinnerDropdown(
                 items = generoList,
                 selectedIndex = genero,
-                onItemSelected = { genero = it },
+                onItemSelected = {
+                    genero = it
+                    Logger.log(context, TAG, "Género cambiado a: ${generoList[it]}")
+                },
                 expanded = expandedGenero,
                 onExpandedChange = { expandedGenero = it },
                 label = "Género"
@@ -113,7 +132,10 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
             GenericSpinnerDropdown(
                 items = formatoList,
                 selectedIndex = formato,
-                onItemSelected = { formato = it },
+                onItemSelected = {
+                    formato = it
+                    Logger.log(context, TAG, "Formato cambiado a: ${formatoList[it]}")
+                },
                 expanded = expandedFormato,
                 onExpandedChange = { expandedFormato = it },
                 label = "Formato"
@@ -121,7 +143,11 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
             Spacer(Modifier.height(8.dp))
             TextField(
                 value = comentarios,
-                onValueChange = { comentarios = it },
+                onValueChange = {
+                    comentarios = it
+                    Logger.log(context, TAG, "Comentarios cambiados")
+                },
+
                 label = { Text("Comentarios") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -143,7 +169,8 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                         film.genre = genero
                         film.format = formato
 
-                        Log.i("Filmoteca", "Cambios Guardados correctamente para la película ${film.title}")
+                        //log
+                        Logger.log(context, TAG, "Cambios Guardados correctamente para la película ${film.title}")
 
                         // Devolver resultado a la pantalla anterior
                         navController.previousBackStackEntry
@@ -157,7 +184,8 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 )
                 FilledButton(
                     onClick = {
-                        Log.i("Filmoteca", "Cambios descartados por el usuario en la película ${film.title}")
+                        Logger.log(context,"Filmoteca", "Cambios descartados por el usuario en la película ${film
+                            .title}")
                         navController.previousBackStackEntry
                             ?.savedStateHandle
                             ?.set("result", Activity.RESULT_CANCELED)
