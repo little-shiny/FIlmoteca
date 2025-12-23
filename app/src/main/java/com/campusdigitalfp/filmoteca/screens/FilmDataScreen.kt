@@ -34,6 +34,7 @@ fun filmDataScreen(navController: NavHostController, filmIndex: Int?) {
         topBar = {
             barraSuperior(
                 navController = navController,
+                esHome = false,
                 atras = true
             )
         }

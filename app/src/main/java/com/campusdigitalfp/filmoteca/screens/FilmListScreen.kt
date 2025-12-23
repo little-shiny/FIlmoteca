@@ -28,6 +28,7 @@ fun filmListScreen(navController: NavHostController) {
         topBar = {
             barraSuperior(
                 navController = navController,
+                esHome = true,
                 atras = false,
                 menu = true,
                 onAddFilm = {

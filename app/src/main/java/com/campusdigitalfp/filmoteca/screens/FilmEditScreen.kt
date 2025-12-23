@@ -29,7 +29,7 @@ fun filmEditScreen(navController: NavHostController, filmIndex: Int?) {
     if (film == null) {
         Scaffold(
             topBar = {
-                barraSuperior(navController = navController, atras = true)
+                barraSuperior(navController = navController, esHome = false, atras = true)
             }
         ) {
             Text(
