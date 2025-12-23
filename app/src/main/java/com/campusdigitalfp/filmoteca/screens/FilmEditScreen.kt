@@ -1,6 +1,7 @@
 package com.campusdigitalfp.filmoteca.screens
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -133,7 +134,7 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
             ) {
                 FilledButton(
                     onClick = {
-                        // Guardar cambios directamente en FilmDataSource
+                        // Guardar cambios
                         film.title = titulo
                         film.director = director
                         film.year = anyo
@@ -141,6 +142,8 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                         film.comments = comentarios
                         film.genre = genero
                         film.format = formato
+
+                        Log.i("Filmoteca", "Cambios Guardados correctamente para la película ${film.title}")
 
                         // Devolver resultado a la pantalla anterior
                         navController.previousBackStackEntry
@@ -154,6 +157,7 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 )
                 FilledButton(
                     onClick = {
+                        Log.i("Filmoteca", "Cambios descartados por el usuario en la película ${film.title}")
                         navController.previousBackStackEntry
                             ?.savedStateHandle
                             ?.set("result", Activity.RESULT_CANCELED)
