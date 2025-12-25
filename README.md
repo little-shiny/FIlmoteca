@@ -1,4 +1,4 @@
-# FIlmoteca - Proyecto para PMDM
+# Filmoteca - Proyecto para PMDM
 
 
 ## Introducción
@@ -17,7 +17,7 @@ encuentran en ejecución así como las instaladas, las que están establecidas p
 ![img.png](Docs/ej1.png)
 
 ### Ejercicio 2 - Versiónd de Android
- En este apartado podemos encontrar información tanto del software como del hardware del dispositivo.
+En este apartado podemos encontrar información tanto del software como del hardware del dispositivo.
 
 La versión de Android utilizada es la 16.0
 
@@ -40,7 +40,8 @@ Monkey no detecta errores salvo uno de permisos al no tener el dispositivo roote
 
 ## Demo de la app Filmoteca:
 
-Aquí una breve demostración de las funcionalidades más importantes de la app
+Aquí una breve demostración de las funcionalidades más importantes de la app:
+
 
 
 
