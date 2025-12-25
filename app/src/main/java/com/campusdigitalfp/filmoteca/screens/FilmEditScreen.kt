@@ -103,7 +103,7 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 value = anyo.toString(),
                 onValueChange = {
                     anyo = it.toIntOrNull() ?: anyo
-                    Logger.log(context, TAG, context.getString(R.string.a_o_cambiado_a, anyo))
+                    Logger.log(context, TAG, context.getString(R.string.a_o_cambiado_a, anyo.toString()))
                 },
                 label = { Text(stringResource(R.string.a_o)) },
                 modifier = Modifier.fillMaxWidth()

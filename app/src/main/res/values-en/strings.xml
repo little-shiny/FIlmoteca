@@ -1,0 +1,39 @@
+<resources>
+    <string name="app_name">Film Library</string>
+    <string name="incidencia_con_filmoteca">Issue with film library</string>
+    <string name="estado_seleccionado">Selected</string>
+    <string name="estado_no_seleccionado">Not selected</string>
+    <string name="sin_t_tulo"><![CDATA[<Untitled>]]></string>
+    <string name="sin_director"><![CDATA[<No Director>]]></string>
+    <string name="pel_cula_no_encontrada">Movie not found</string>
+    <string name="pel_cula_no_encontrada_para_filmid">Movie not found for filmId=%1$s</string>
+    <string name="t_tulo_cambiado_a">Title changed to: %1$s</string>
+    <string name="director_cambiado_a">Director changed to: %1$s</string>
+    <string name="a_o_cambiado_a">Year changed to: %1$s</string>
+    <string name="t_tulo">Title</string>
+    <string name="director">Director</string>
+    <string name="a_o">Year</string>
+    <string name="url_imdb_cambiada_a">IMDb URL changed to: %1$s</string>
+    <string name="url_imdb">IMDb URL</string>
+    <string name="g_nero_cambiado_a">Genre changed to: %1$s</string>
+    <string name="g_nero">Genre</string>
+    <string name="formato_cambiado_a">Format changed to: %1$s</string>
+    <string name="formato">Format</string>
+    <string name="comentarios_cambiados">Comments changed</string>
+    <string name="comentarios">Comments</string>
+    <string name="cambios_guardados_correctamente_para_la_pel_cula">
+        Changes successfully saved for the movie %1$s
+    </string>
+    <string name="guardar">Save</string>
+    <string name="cambios_descartados_por_el_usuario_en_la_pel_cula">
+        Changes discarded by the user for the movie %1$s
+    </string>
+    <string name="cancelar">Cancel</string>
+    <string name="selecciona_una_opci_n">Select an option</string>
+    <string name="imagen_de_la_pel_cula">Movie image</string>
+    <string name="desconocido">Unknown</string>
+    <string name="edici_n_cancelada">Edit canceled</string>
+    <string name="ver_en_imdb">View on IMDb</string>
+    <string name="editar">Edit</string>
+    <string name="volver">Back</string>
+</resources>
