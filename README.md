@@ -16,7 +16,7 @@ encuentran en ejecución así como las instaladas, las que están establecidas p
 
 ![img.png](Docs/ej1.png)
 
-### Ejercicio 2 - Versiónd de Android
+### Ejercicio 2 - Versión de Android
 En este apartado podemos encontrar información tanto del software como del hardware del dispositivo.
 
 La versión de Android utilizada es la 16.0
@@ -29,7 +29,7 @@ No poseo un terminal Android físico, por lo que he empleado el AVD con un telé
 ![img.png](Docs/img.png)
 
 ### Ejercicio 21 - Filtrado de logs
-Utilizamos tags para poder filtrar los logs en logcat:
+Utilizamos tags para poder filtrar los logs en logcat cada vez que se realice un cambio en la pantalla FilmEditScreen
 
 ![Captura de pantalla 2025-12-23 144721.png](Docs/Captura%20de%20pantalla%202025-12-23%20144721.png)
 
@@ -41,6 +41,10 @@ Monkey no detecta errores salvo uno de permisos al no tener el dispositivo roote
 ## Demo de la app Filmoteca:
 
 Aquí una breve demostración de las funcionalidades más importantes de la app:
+
+
+https://github.com/user-attachments/assets/af6572aa-1ff4-47d5-830e-1929e5dd3753
+
 
 
 
