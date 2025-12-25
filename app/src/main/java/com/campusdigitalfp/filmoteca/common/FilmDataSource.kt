@@ -1,10 +1,11 @@
 package com.campusdigitalfp.filmoteca.common
 
+import android.content.Context
 import com.campusdigitalfp.filmoteca.R
 
 object FilmDataSource {
     val films: MutableList<Film> = mutableListOf()
-
+    fun loadData(context: Context) {}
     init {
         // Primera película: Harry Potter y la piedra filosofal
         val f1 = Film()

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -51,7 +52,7 @@ fun filmDataScreen(navController: NavHostController, filmId: Int?) {
         ){
             // Si no se encuentran los datos o no se pueden leer
             if(film == null){
-                Text("Película no encontrada")
+                Text(stringResource(R.string.pel_cula_no_encontrada))
                 return@Scaffold
             }
 
@@ -67,7 +68,7 @@ fun filmDataScreen(navController: NavHostController, filmId: Int?) {
             ) {
                 Image(
                     painter = painterResource(id = imageRes),
-                    contentDescription = "Imagen de la película",
+                    contentDescription = stringResource(R.string.imagen_de_la_pel_cula),
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .size(120.dp)
@@ -75,23 +76,23 @@ fun filmDataScreen(navController: NavHostController, filmId: Int?) {
                 Column {
                     //Titulo
                     Text(
-                        text = film.title ?: "Sin título",
+                        text = film.title ?: stringResource(R.string.sin_t_tulo),
                         style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Left,
                         modifier = Modifier.padding(top = 20.dp)
                     )
                     Text(
-                        text = "Director:",
+                        text = stringResource(R.string.director),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                     //Autor
                     Text(
-                        text = film.director ?: "Desconocido",
+                        text = film.director ?: stringResource(R.string.desconocido),
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = "Año:",
+                        text = stringResource(R.string.a_o),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -107,21 +108,21 @@ fun filmDataScreen(navController: NavHostController, filmId: Int?) {
             Spacer(modifier = Modifier.height(20.dp))
             if (editResult == Activity.RESULT_CANCELED) {
                 Text(
-                    "Edición cancelada",
+                    stringResource(R.string.edici_n_cancelada),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
             Text(
-                text = "Género: ${film.genreToString()}",
+                text = "${stringResource(R.string.g_nero)} ${film.genreToString()}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .padding(10.dp)
             )
             Text(
-                text = "Formato: ${film.formatToString()}",
+                text = "${stringResource(R.string.formato)} ${film.formatToString()}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -133,7 +134,7 @@ fun filmDataScreen(navController: NavHostController, filmId: Int?) {
                 onClick = {
                     abrirEnIMDB(film.imdbUrl ?: "", context)
                 },
-                texto = "Ver en IMDB",
+                texto = stringResource(R.string.ver_en_imdb),
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
@@ -148,7 +149,7 @@ fun filmDataScreen(navController: NavHostController, filmId: Int?) {
                     onClick = {
                         navController.navigate("FilmEdit/$filmId")
                     },
-                    texto = "Editar",
+                    texto = stringResource(R.string.editar),
                     modifier = Modifier.weight(1f)
 
                 )
@@ -158,7 +159,7 @@ fun filmDataScreen(navController: NavHostController, filmId: Int?) {
                             popUpTo("FilmListScreen") { inclusive = true }
                         }
                     },
-                    texto = "Volver",
+                    texto = stringResource(R.string.volver),
                     modifier = Modifier.weight(1f)
                 )
             }

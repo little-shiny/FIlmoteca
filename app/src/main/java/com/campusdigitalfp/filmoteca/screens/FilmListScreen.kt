@@ -25,6 +25,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.res.stringResource
+import com.campusdigitalfp.filmoteca.R
 
 
 @Composable
@@ -175,7 +177,7 @@ fun FilmCard(
                     if (isSelected){
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
-                            contentDescription = "Seleccionado",
+                            contentDescription = stringResource(R.string.estado_seleccionado),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.fillMaxSize()
 
@@ -183,7 +185,7 @@ fun FilmCard(
                     }else{
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "No seleccionado",
+                            contentDescription = stringResource(R.string.estado_no_seleccionado),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -196,7 +198,7 @@ fun FilmCard(
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
                                 .size(100.dp)
-                                .padding(top = 7.dp, end = 16.dp , bottom = 7.dp)
+                                .padding(top = 7.dp, end = 16.dp, bottom = 7.dp)
                         )
                     }
                 }
@@ -205,13 +207,13 @@ fun FilmCard(
             // Column con la información
             Column {
                 Text(
-                    text = film.title ?: "<Sin Título>",
+                    text = film.title ?: stringResource(R.string.sin_t_tulo),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary,
 
                 )
                 Text(
-                    text = film.director ?: "<Sin Director>",
+                    text = film.director ?: stringResource(R.string.sin_director),
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )

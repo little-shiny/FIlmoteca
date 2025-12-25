@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.R
@@ -30,13 +31,14 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
             }
         ) {
             Text(
-                text = "Película no encontrada",
+                text = stringResource(R.string.pel_cula_no_encontrada),
                 modifier = Modifier
                     .padding(16.dp)
             )
         }
         // Log de error
-        Logger.log(context,TAG,"Película no encontrada para filmId=$filmId")
+        filmId?.let { stringResource(R.string.pel_cula_no_encontrada_para_filmid, it) }
+            ?.let { Logger.log(context,TAG, it) }
         return
     }
 
@@ -81,9 +83,9 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 value = titulo,
                 onValueChange = {
                     titulo = it
-                    Logger.log(context, TAG, "Título cambiado a: $it")
+                    Logger.log(context, TAG, context.getString(R.string.t_tulo_cambiado_a, it))
                 },
-                label = { Text("Título") },
+                label = { Text(stringResource(R.string.t_tulo)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
@@ -91,9 +93,9 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 value = director,
                 onValueChange = {
                     director = it
-                    Logger.log(context, TAG, "Director cambiado a: $it")
+                    Logger.log(context, TAG, context.getString(R.string.director_cambiado_a, it))
                 },
-                label = { Text("Director") },
+                label = { Text(stringResource(R.string.director)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
@@ -101,9 +103,9 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 value = anyo.toString(),
                 onValueChange = {
                     anyo = it.toIntOrNull() ?: anyo
-                    Logger.log(context, TAG, "Año cambiado a: $anyo")
+                    Logger.log(context, TAG, context.getString(R.string.a_o_cambiado_a, anyo))
                 },
-                label = { Text("Año") },
+                label = { Text(stringResource(R.string.a_o)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
@@ -111,9 +113,9 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 value = url,
                 onValueChange = {
                     url = it
-                    Logger.log(context, TAG, "URL IMDb cambiada a: $it")
+                    Logger.log(context, TAG, context.getString(R.string.url_imdb_cambiada_a, it))
                 },
-                label = { Text("URL IMDb") },
+                label = { Text(stringResource(R.string.url_imdb)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(8.dp))
@@ -122,11 +124,11 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 selectedIndex = genero,
                 onItemSelected = {
                     genero = it
-                    Logger.log(context, TAG, "Género cambiado a: ${generoList[it]}")
+                    Logger.log(context, TAG, context.getString(R.string.g_nero_cambiado_a, generoList[it]))
                 },
                 expanded = expandedGenero,
                 onExpandedChange = { expandedGenero = it },
-                label = "Género"
+                label = stringResource(R.string.g_nero)
             )
             Spacer(Modifier.height(8.dp))
             GenericSpinnerDropdown(
@@ -134,21 +136,21 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                 selectedIndex = formato,
                 onItemSelected = {
                     formato = it
-                    Logger.log(context, TAG, "Formato cambiado a: ${formatoList[it]}")
+                    Logger.log(context, TAG, context.getString(R.string.formato_cambiado_a, formatoList[it]))
                 },
                 expanded = expandedFormato,
                 onExpandedChange = { expandedFormato = it },
-                label = "Formato"
+                label = stringResource(R.string.formato)
             )
             Spacer(Modifier.height(8.dp))
             TextField(
                 value = comentarios,
                 onValueChange = {
                     comentarios = it
-                    Logger.log(context, TAG, "Comentarios cambiados")
+                    Logger.log(context, TAG, context.getString(R.string.comentarios_cambiados))
                 },
 
-                label = { Text("Comentarios") },
+                label = { Text(stringResource(R.string.comentarios)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(16.dp))
@@ -170,7 +172,8 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                         film.format = formato
 
                         //log
-                        Logger.log(context, TAG, "Cambios Guardados correctamente para la película ${film.title}")
+                        Logger.log(context, TAG,
+                            context.getString(R.string.cambios_guardados_correctamente_para_la_pel_cula, film.title))
 
                         // Devolver resultado a la pantalla anterior
                         navController.previousBackStackEntry
@@ -180,19 +183,21 @@ fun filmEditScreen(navController: NavHostController, filmId: Int?) {
                         navController.popBackStack()
                     },
                     modifier = Modifier.weight(1f),
-                    texto = "Guardar"
+                    texto = stringResource(R.string.guardar)
                 )
                 FilledButton(
                     onClick = {
-                        Logger.log(context,"Filmoteca", "Cambios descartados por el usuario en la película ${film
-                            .title}")
+                        Logger.log(context,"Filmoteca", context.getString(
+                            R.string.cambios_descartados_por_el_usuario_en_la_pel_cula, film
+                                .title
+                        ))
                         navController.previousBackStackEntry
                             ?.savedStateHandle
                             ?.set("result", Activity.RESULT_CANCELED)
                         navController.popBackStack()
                     },
                     modifier = Modifier.weight(1f),
-                    texto = "Cancelar"
+                    texto = stringResource(R.string.cancelar)
                 )
             }
         }
@@ -208,7 +213,7 @@ fun <T> GenericSpinnerDropdown(
     onItemSelected: (Int) -> Unit,              // Callback con el índice seleccionado
     expanded: Boolean,                           // Estado de expansión del dropdown
     onExpandedChange: (Boolean) -> Unit,        // Función para cambiar expansión
-    label: String = "Selecciona una opción",
+    label: String = stringResource(R.string.selecciona_una_opci_n),
     itemToString: (T) -> String = { it.toString() } // Cómo mostrar cada item
 ) {
     if (items.isEmpty()) return

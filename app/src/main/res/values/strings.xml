@@ -1,4 +1,39 @@
 <resources>
     <string name="app_name">Filmoteca</string>
     <string name="incidencia_con_filmoteca">Incidencia con filmoteca</string>
+    <string name="estado_seleccionado">Seleccionado</string>
+    <string name="estado_no_seleccionado">No seleccionado</string>
+    <string name="sin_t_tulo"><![CDATA[<Sin Título>]]></string>
+    <string name="sin_director"><![CDATA[<Sin Director>]]></string>
+    <string name="pel_cula_no_encontrada">Película no encontrada</string>
+    <string name="pel_cula_no_encontrada_para_filmid">Película no encontrada para filmId=%1$s</string>
+    <string name="t_tulo_cambiado_a">Título cambiado a: %1$s</string>
+    <string name="director_cambiado_a">Director cambiado a: %1$s</string>
+    <string name="a_o_cambiado_a">Año cambiado a: %1$s</string>
+    <string name="t_tulo">Título</string>
+    <string name="director">Director</string>
+    <string name="a_o">Año</string>
+    <string name="url_imdb_cambiada_a">URL IMDb cambiada a: %1$s</string>
+    <string name="url_imdb">URL IMDb</string>
+    <string name="g_nero_cambiado_a">Género cambiado a: %1$s</string>
+    <string name="g_nero">Género</string>
+    <string name="formato_cambiado_a">Formato cambiado a: %1$s</string>
+    <string name="formato">Formato</string>
+    <string name="comentarios_cambiados">Comentarios cambiados</string>
+    <string name="comentarios">Comentarios</string>
+    <string name="cambios_guardados_correctamente_para_la_pel_cula">Cambios Guardados correctamente para la película
+        %1$s
+    </string>
+    <string name="guardar">Guardar</string>
+    <string name="cambios_descartados_por_el_usuario_en_la_pel_cula">Cambios descartados por el usuario en la película
+        %1$s
+    </string>
+    <string name="cancelar">Cancelar</string>
+    <string name="selecciona_una_opci_n">Selecciona una opción</string>
+    <string name="imagen_de_la_pel_cula">Imagen de la película</string>
+    <string name="desconocido">Desconocido</string>
+    <string name="edici_n_cancelada">Edición cancelada</string>
+    <string name="ver_en_imdb">Ver en IMDB</string>
+    <string name="editar">Editar</string>
+    <string name="volver">Volver</string>
 </resources>
