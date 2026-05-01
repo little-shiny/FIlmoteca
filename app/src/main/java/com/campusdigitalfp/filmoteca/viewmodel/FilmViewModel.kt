@@ -199,4 +199,15 @@ class FilmViewModel: ViewModel() {
             )
         )
     }
+
+    /**
+     * Elimina múltiples películas seleccionadas en una sola operacion en firestore
+     * Actualiza despues la lista de peliculas
+     */
+    fun deleteSelectedFilms(selectedFilms: List<Film>){
+        viewModelScope.launch {
+            repository.deleteMultipleFilms(selectedFilms)
+            fetchFilms()
+        }
+    }
 }
