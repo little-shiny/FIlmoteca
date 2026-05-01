@@ -198,6 +198,11 @@ class FilmViewModel: ViewModel() {
                 comments = "Esperanza y amistad dentro de una prisión."
             )
         )
+        viewModelScope.launch {
+            films.forEach { film ->
+                repository.addFilm(film)
+            }
+        }
     }
 
     /**
