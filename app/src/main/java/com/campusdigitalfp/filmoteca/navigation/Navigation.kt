@@ -79,31 +79,6 @@ fun Navigation(viewModel: FilmViewModel){
         composable(NavRoutes.NEW.abreviatura){
             NewFilmScreen(navController)
         }
-        // composable para crear una ruta edit/x donde x es el parametro de la posicion literal del array
-        composable(
-            route = "filmEdit/{filmIndex}",
-            arguments = listOf(
-                navArgument("filmIndex"){type = NavType.IntType}
-            )
-        ){ backStackEntry ->
-            val index = backStackEntry.arguments?.getInt("filmIndex")
-            filmEditScreen(navController, index)
-        }
-
-        // Pantalla FilmDataScreen con parámetro
-        // **Ahora index para poder navegar por el array de las peliculas**
-        composable(
-            route = "filmData/{filmIndex}",
-            arguments = listOf(
-                navArgument("filmIndex"){
-                    type = NavType.IntType
-                }
-            )
-        ){ backStackEntry ->
-            val index =
-                backStackEntry.arguments?.getInt("filmIndex")
-            filmDataScreen(navController, index)
-        }
     }
 }
 
