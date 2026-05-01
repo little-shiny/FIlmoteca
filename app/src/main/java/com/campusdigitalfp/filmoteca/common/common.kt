@@ -9,12 +9,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.R
+import com.campusdigitalfp.filmoteca.models.Film
 
 // Funciones composables compartidas en toda la app
 
@@ -33,7 +35,7 @@ fun barraSuperior(
     // Se utiliza (() -> Unit)? para que la barra sea reutilizable y sean funciones opcionales
     //parametros para la seleccion multiple
     isActionMode: MutableState<Boolean>? = null,
-    selectedFilms: MutableList<Int>? = null, // permite coger datos de una lista observable y que puede ser de
+    selectedFilms: SnapshotStateList<Film> = null, // permite coger datos de una lista observable y que puede ser de
     // cualquier elmemento. no especifico film porque podría usarse para otro tipo de listas
     onDeleteSelected: (() -> Unit)? = null
 

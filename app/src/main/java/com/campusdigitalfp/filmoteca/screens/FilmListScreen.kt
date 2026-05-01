@@ -1,233 +1,187 @@
 package com.campusdigitalfp.filmoteca.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
+import android.widget.Toast
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.*
-import androidx.navigation.compose.rememberNavController
-import com.campusdigitalfp.filmoteca.common.Film
-import com.campusdigitalfp.filmoteca.common.FilmViewModel
 import com.campusdigitalfp.filmoteca.common.barraSuperior
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import com.campusdigitalfp.filmoteca.R
+import com.campusdigitalfp.filmoteca.models.Film
+import com.campusdigitalfp.filmoteca.navigation.NavRoutes
+import com.campusdigitalfp.filmoteca.ui.theme.FilmotecaTheme
+import com.campusdigitalfp.filmoteca.viewmodel.FilmViewModel
 
-
+/**
+ * Pantalla principal que muestra la lista de películas almacenadas en Firestore
+ *
+ * @param navController Controlador de navegación para cambiar entre pantallas
+ * @param viewModel ViewModel que gestiona los hábitos y su estado
+ */
 @Composable
-fun filmListScreen(navController: NavHostController) {
+fun filmListScreen(navController: NavHostController, viewModel: FilmViewModel = viewModel()) {
 
-    val viewModel: FilmViewModel = viewModel()
     val isActionMode = remember { mutableStateOf(false) }
-    val selectedFilmsIds = remember { mutableStateListOf<Int>() } //cambio a IDS de las películas
+    val selectedFilms = remember { mutableStateListOf<Film>() } //cambio a IDS de las películas
+    val films by viewModel.films.collectAsState() // estado de las peliculas observadas
 
-    Scaffold(
-        topBar = {
-            barraSuperior(
-                navController = navController,
-                esHome = true,
-                atras = true,
-                menu = true,
+    // Manejo de los mensajes temporales a traves del NavController
+    navController.currentBackStackEntry?.savedStateHandle?.let{
+        val context = LocalContext.current
 
-                // Action Mode
-                isActionMode = isActionMode,
-                selectedFilms = selectedFilmsIds,
-                onDeleteSelected = {
-                    viewModel.deleteFilmsByIds(selectedFilmsIds) //nos movemos por las id
-                    selectedFilmsIds.clear()
-                    isActionMode.value = false
-                },
+        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+        val result = savedStateHandle?.get<String>("key_result")
 
-                onAddFilm = {
-                    //Se añade la película por defecto a la lista
-                    val newFilm = viewModel.addDefaultFilm()
-                    // navegar por el ID de la película en el array
-                    navController.navigate("filmEdit/${newFilm.id}")
-                },
-                onAbout = {
-                    navController.navigate("AboutScreen")
-                }
-            )
-        },
-
-    ){innerPadding ->
-        Column{
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = innerPadding.calculateTopPadding(),
-                        bottom = innerPadding.calculateBottomPadding()
-                    )
-            ) {
-                items(
-                    viewModel.films,
-                    key = {film -> film.id} // Id unica para cada película
-                ){film ->
-
-                    // Comprobamos si la película actual está seleccionada
-                    val isSelected = selectedFilmsIds.contains(film.id)
-
-                    FilmCard(
-                        film = film,
-                        // Indicamos si este item está seleccionado
-                        isSelected = isSelected,
-                        // Indicamos si el modo selección múltiple está activo
-                        isActionMode = isActionMode.value,
-
-                        // Pulsación corta sobre la tarjeta
-                        onClick ={
-                            if(isActionMode.value){
-                                // Si estamos en modo selección, se selecciona o deselecciona la película
-                                if(isSelected){
-                                    selectedFilmsIds.remove(film.id)
-                                } else {
-                                    selectedFilmsIds.add(film.id)
-                                }
-
-                                // Si no queda ninguna película seleccionada,
-                                // se sale del modo selección múltiple
-                                if (selectedFilmsIds.isEmpty()){
-                                    isActionMode.value = false
-                                }
-                            } else {
-                                // Si no estamos en modo selección,
-                                // se navega a la pantalla de detalle de la película
-                                navController.navigate("FilmData/${film.id}")// Navegamos por ID
-                            }
-                        },
-
-                        // Pulsación larga sobre la tarjeta
-                        onLongClick = {
-                            // Si el modo selección no está activo,
-                            // se activa y se selecciona la película pulsada
-                            if(!isActionMode.value) {
-                                isActionMode.value = true
-                                selectedFilmsIds.add(film.id)
-                            }
-                        }
-                    )
-                }
+        LaunchedEffect(result) {
+            result?.let {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                savedStateHandle.remove<String>("key_result")
+            }
+        }
+    }
+    FilmotecaTheme {
+        Scaffold(
+            topBar = {
+                barraSuperior(
+                    navController = navController,
+                    atras = false,
+                    isActionMode = isActionMode,
+                    selectedFilms = selectedFilms,
+                )
+            }
+        ){paddingValues ->
+            Column(modifier = Modifier.padding(paddingValues)) {
+                ViewFilmList(
+                    films,
+                    navController,
+                    isActionMode,
+                    selectedFilms
+                )
             }
         }
     }
 }
 
-
+/**
+ * Vista que representa una sola película en la lista
+ *
+ * @param film objeto que contiene la informacion de la pelicula
+ * @param onLongClick Accion al hacer pulsacion larga
+ * @param isSelected Indica si la pelicula está seleccionada en la seleccion multiple
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun FilmCard(
+fun ViewFilm(
     film: Film,
-    isSelected: Boolean,
-    isActionMode: Boolean,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    onLongClick: () -> Unit,
+    isSelected: Boolean
 ){
-    Card(
+    Row(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            ),
-        shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(
-            // La Card seleccionada cambia de color
-            containerColor = if(isSelected)
-                MaterialTheme.colorScheme.secondaryContainer
-           else
-                MaterialTheme.colorScheme.surface
-        )
-    ){
-        Row (
+            .padding(8.dp)
+            .combinedClickable (onClick = onClick, onLongClick = onLongClick)
+    ) {
+        Image(
+            painter = painterResource(if(isSelected) R.drawable.baseline_check_24 else R.drawable.film),
+            contentDescription = "Icono película",
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            //Imagen de la pelicula o icono del check:
-            // Se usa Box para poder cambiar la imagen y el icono. Si estamos en modo seleccion multiple se muestran
-            // los iconos del check, si no, se muestra la imagen de la película
-            Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .padding(
-                        top = 7.dp,
-                        end = 16.dp,
-                        bottom = 7.dp
-                    )
+                .size(40.dp)
+                .clip(CircleShape)
+                .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        var isExpanded by remember{ mutableStateOf(false) } // controla si se expande la descripcion
+        val surfaceColor by animateColorAsState(
+            if(isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                label= "AnimacionDeColor"
+        )
+
+        Column (modifier = Modifier.clickable { isExpanded= !isExpanded }) {
+            Text(
+                text = film.title,
+                color = MaterialTheme.colorScheme.secondary,
+                style = MaterialTheme.typography.titleSmall
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                shadowElevation = 1.dp,
+                color = surfaceColor,
+                modifier = Modifier.animateContentSize().padding(1.dp)
             ){
-                if(isActionMode){
-                    if (isSelected){
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = stringResource(R.string.estado_seleccionado),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.fillMaxSize()
-
-                        )
-                    }else{
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = stringResource(R.string.estado_no_seleccionado),
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                } else {
-                    if(film.imageResId !=0){
-                        Image(
-                            painter = painterResource(id = film.imageResId),
-                            contentDescription = film.title,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .size(100.dp)
-                                .padding(top = 7.dp, end = 16.dp, bottom = 7.dp)
-                        )
-                    }
-                }
-            }
-
-            // Column con la información
-            Column {
                 Text(
-                    text = film.title ?: stringResource(R.string.sin_t_tulo),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary,
-
-                )
-                Text(
-                    text = film.director ?: stringResource(R.string.sin_director),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = film.comments,
+                    modifier = Modifier.padding(4.dp),
+                    maxLines = if(isExpanded) Int.MAX_VALUE else 1,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+/**
+ * Lista de peliculas representadas en un LazyColumn
+ *
+ * @param films Lista de peliculas a mostrar
+ * @param navController Controlador de navegacion para cambiar entre pantallas
+ * @param isActionMode Indica si la seleccion multiple está activa
+ * @param selectedFilms Lista de películas seleccionadas en modo selección múltiple
+ */
 @Composable
-fun filmListScreenPreview(){
-    val navController = rememberNavController()
-    filmListScreen(
-        navController = navController
-    )
-}
+fun ViewFilmList(
+    films: List<Film>,
+    navController: NavHostController,
+    isActionMode: MutableState<Boolean>,
+    selectedFilms: MutableList<Film>
+){
+    LazyColumn (
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ){
+        items(films){ film ->
+            ViewFilm(
+                film,
+                onClick = {
+                    if (isActionMode.value){
+                        // maneja la seleccion y deseleccion en modo multiple
+                        if (selectedFilms.contains(film)){
+                            selectedFilms.remove(film)
+                            if (selectedFilms.isEmpty()){
+                                isActionMode.value = false
+                            }
+                        }else{
+                            selectedFilms.add(film)
+                        }
+                    }else {
+                        // Navega a la pantalla de detalles de la película seleccionada
+                        navController.navigate(NavRoutes.DETAILS.abreviatura + film.id)
+                    }
+                },
+                onLongClick = {
+                    // Activa el modo seleccion múltiple y agrega la película seleccionada
+                    isActionMode.value = true
+                    selectedFilms.add(film)
+                },
+                isSelected = selectedFilms.contains(film)
+            )
 
+        }
+    }
+}
