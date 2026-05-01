@@ -81,11 +81,14 @@ class FilmViewModel: ViewModel() {
      */
     fun addExampleFilms(){
         val films = listOf(
-            Film(title = "Harry Potter y la piedra filosofal",
+            Film(
+                title = "Harry Potter y la piedra filosofal",
                 director = "Chris Columbus",
-                year = 2001, imageResId = 1,
+                year = 2001,
+                imageResId = 1,
                 format = "DVD",
-                genre = "Action", imbdUrl = "http://www.imdb.com/title/tt0241527",
+                genre = "Action",
+                imbdUrl = "http://www.imdb.com/title/tt0241527",
                 comments = "Una aventura mágica en Hogwarts."
             ),
             Film(
@@ -98,7 +101,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0120737",
                 comments = "Una épica aventura en la Tierra Media."
             ),
-
             Film(
                 title = "Inception",
                 director = "Christopher Nolan",
@@ -109,7 +111,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt1375666",
                 comments = "Un viaje dentro de los sueños y la mente."
             ),
-
             Film(
                 title = "Titanic",
                 director = "James Cameron",
@@ -120,7 +121,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0120338",
                 comments = "Una historia de amor en medio de una tragedia."
             ),
-
             Film(
                 title = "The Dark Knight",
                 director = "Christopher Nolan",
@@ -131,7 +131,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0468569",
                 comments = "Batman enfrenta al Joker en Gotham."
             ),
-
             Film(
                 title = "Forrest Gump",
                 director = "Robert Zemeckis",
@@ -142,7 +141,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0109830",
                 comments = "La vida extraordinaria de un hombre sencillo."
             ),
-
             Film(
                 title = "The Matrix",
                 director = "Lana Wachowski, Lilly Wachowski",
@@ -153,7 +151,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0133093",
                 comments = "Una realidad simulada que oculta la verdad."
             ),
-
             Film(
                 title = "Gladiator",
                 director = "Ridley Scott",
@@ -164,7 +161,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0172495",
                 comments = "Venganza y honor en la antigua Roma."
             ),
-
             Film(
                 title = "Avatar",
                 director = "James Cameron",
@@ -175,7 +171,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0499549",
                 comments = "Un mundo alienígena lleno de vida y conflictos."
             ),
-
             Film(
                 title = "Jurassic Park",
                 director = "Steven Spielberg",
@@ -186,7 +181,6 @@ class FilmViewModel: ViewModel() {
                 imbdUrl = "http://www.imdb.com/title/tt0107290",
                 comments = "Dinosaurios traídos de vuelta a la vida."
             ),
-
             Film(
                 title = "The Shawshank Redemption",
                 director = "Frank Darabont",
