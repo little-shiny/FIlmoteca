@@ -47,7 +47,7 @@ class FilmRepository {
      * Actualiza una pelicula en firestore
      * usa set para sobreescribir los datos
      */
-    suspend fun uodateFilm(film: Film){
+    suspend fun updateFilm(film: Film){
         filmsCollection.document(film.id).set(film).await()
     }
 
