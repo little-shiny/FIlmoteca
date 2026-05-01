@@ -28,7 +28,6 @@ fun AboutScreen(navController: NavHostController) {
         topBar = {
             barraSuperior(
                 navController = navController,
-                esHome = false,
                 atras = true
             )
         }
