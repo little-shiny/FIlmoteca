@@ -39,10 +39,6 @@ fun barraSuperior(
     var expanded by remember { mutableStateOf(false) } // estado del menú desplegable
 
     TopAppBar(
-        colors = TopAppBarDefaults.CenterAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer, //Fondo de la barra
-            titleContentColor = MaterialTheme.colorScheme.primary // Color del texto del título
-        ),
         title =  {
             Text(text = "Filmoteca")
         },
