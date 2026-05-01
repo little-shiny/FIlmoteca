@@ -92,8 +92,8 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="imagePath" value="C:\Users\mim0x\Documents\dev\Filmoteca\app\src\main\res\drawable\film.png" />
-                                                <entry key="scalingPercent" value="128" />
+                                                <entry key="imagePath" value="C:\Users\mim0x\Downloads\FILMOTECA.png" />
+                                                <entry key="scalingPercent" value="81" />
                                                 <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
@@ -128,6 +128,7 @@
                                   </option>
                                   <option name="values">
                                     <map>
+                                      <entry key="backgroundAssetType" value="COLOR" />
                                       <entry key="backgroundColor" value="ffffff" />
                                     </map>
                                   </option>
