@@ -1,22 +1,15 @@
 package com.campusdigitalfp.filmoteca.common
 
-import android.service.autofill.OnClickAction
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.models.Film
 import com.campusdigitalfp.filmoteca.navigation.NavRoutes
 import com.campusdigitalfp.filmoteca.viewmodel.FilmViewModel
@@ -31,7 +24,6 @@ import com.campusdigitalfp.filmoteca.viewmodel.FilmViewModel
 fun barraSuperior(
     navController: NavHostController,
     atras: Boolean = true,
-    menu: Boolean = false,
     isActionMode: MutableState<Boolean> = mutableStateOf(false),
     selectedFilms: MutableList<Film> = mutableListOf(),
     viewModel: FilmViewModel = viewModel()
@@ -65,7 +57,7 @@ fun barraSuperior(
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = {expanded = false}
-                    // Cierra el menú cuando se toca fuera de el
+                    // Cierra el menú cuando se toca fuera de él
                 ) {
                     // opción para añadir una nueva película
                     DropdownMenuItem(

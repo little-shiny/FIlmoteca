@@ -1,6 +1,5 @@
 package com.campusdigitalfp.filmoteca.screens
 
-import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,13 +8,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 import com.campusdigitalfp.filmoteca.models.Film
 import com.campusdigitalfp.filmoteca.ui.theme.FilmotecaTheme

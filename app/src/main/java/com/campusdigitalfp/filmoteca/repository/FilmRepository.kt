@@ -3,7 +3,6 @@ package com.campusdigitalfp.filmoteca.repository
 import android.util.Log
 import com.campusdigitalfp.filmoteca.models.Film
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.tasks.await
 
 /**
