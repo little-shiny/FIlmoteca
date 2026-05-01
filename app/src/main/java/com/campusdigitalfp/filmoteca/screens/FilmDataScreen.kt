@@ -6,9 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,162 +15,88 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
+import com.campusdigitalfp.filmoteca.models.Film
+import com.campusdigitalfp.filmoteca.navigation.NavRoutes
+import com.campusdigitalfp.filmoteca.ui.theme.FilmotecaTheme
+import com.campusdigitalfp.filmoteca.viewmodel.FilmViewModel
+
+/**
+ * Pantalla que muestra los detalles de una película
+ *
+ * Permite ver al usuario la información, editarla o eliminarla
+ *
+ * @param navController Controlador de navegación
+ * @param film Objeto que contiene los datos de la pelicula
+ * @param viewModel ViewModel para gestionar las películas
+ */
 @Composable
-fun filmDataScreen(navController: NavHostController, filmId: Int?) {
-    // Estado para mostrar el resultado de si se ha editado o no
-    val editResult = navController
-        .currentBackStackEntry
-        ?.savedStateHandle
-        ?.get<Int>("result")
-    val context = LocalContext.current
-
-    val film = FilmDataSource.films.firstOrNull { it.id == filmId }
-
-    Scaffold(
-        topBar = {
-            barraSuperior(
-                navController = navController,
-                esHome = false,
-                atras = true
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(
-                    top = innerPadding.calculateTopPadding(),
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 16.dp
-                )
-        ){
-            // Si no se encuentran los datos o no se pueden leer
-            if(film == null){
-                Text(stringResource(R.string.pel_cula_no_encontrada))
-                return@Scaffold
-            }
-
-            // Imagen que no da error al modificar la lista de peliculas
-            val imageRes = if(film.imageResId != 0)
-                film.imageResId else R.drawable.film // Imagen por defecto si no hay
-
-            //Imagen y título
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+fun filmDataScreen(
+    navController: NavHostController,
+    film: Film,
+    viewModel: FilmViewModel = viewModel()
+) {
+    FilmotecaTheme {
+        Scaffold(
+            topBar = { barraSuperior(navController = navController,) }
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Image(
-                    painter = painterResource(id = imageRes),
-                    contentDescription = stringResource(R.string.imagen_de_la_pel_cula),
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .size(120.dp)
+                // Título de la película
+                Text(
+                    text = film.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 9.dp),
+                    textAlign = TextAlign.Center
                 )
-                Column {
-                    //Titulo
-                    Text(
-                        text = film.title ?: stringResource(R.string.sin_t_tulo),
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.padding(top = 20.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.director),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    //Autor
-                    Text(
-                        text = film.director ?: stringResource(R.string.desconocido),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.a_o),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    //Año
-                    Text(
-                        text = film.year.toString(),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                //descripción de la película
+                Text(
+                    text = film.comments,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    textAlign = TextAlign.Justify
+                )
+
+                //Botón para editar la película
+                Button(
+                    onClick = { navController.navigate(NavRoutes.EDIT.abreviatura + film.id) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    Text(text = "Editar")
                 }
 
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-            if (editResult == Activity.RESULT_CANCELED) {
-                Text(
-                    stringResource(R.string.edici_n_cancelada),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            }
-            Text(
-                text = "${stringResource(R.string.g_nero)} ${film.genreToString()}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(10.dp)
-            )
-            Text(
-                text = "${stringResource(R.string.formato)} ${film.formatToString()}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .padding(10.dp)
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-
-            FilledButton(
-                onClick = {
-                    abrirEnIMDB(film.imdbUrl ?: "", context)
-                },
-                texto = stringResource(R.string.ver_en_imdb),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth(),
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-
-            ){
-                FilledButton(
+                // Botón para eliminar la película
+                Button(
                     onClick = {
-                        navController.navigate("FilmEdit/$filmId")
+                        film.id.let { viewModel.deleteFilm(it) }
+                        navController.navigate(NavRoutes.LIST.abreviatura)
                     },
-                    texto = stringResource(R.string.editar),
-                    modifier = Modifier.weight(1f)
-
-                )
-                FilledButton(
-                    onClick = {
-                        navController.navigate("FilmListScreen") {
-                            popUpTo("FilmListScreen") { inclusive = true }
-                        }
-                    },
-                    texto = stringResource(R.string.volver),
-                    modifier = Modifier.weight(1f)
-                )
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                ) {
+                    Text(text = "Eliminar")
+                }
+                // Botón para volver atrás
+                Button(
+                    onClick = { navController.popBackStack() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(text = "Volver")
+                }
             }
         }
     }
 }
 
-fun abrirEnIMDB(url: String, context: Context){
-    val intent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse(url)
-    }
-    context.startActivity(intent)
-}
 
 
 
