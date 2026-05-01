@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.campusdigitalfp.filmoteca.R
 
 // Clase que gestiona los cambios al rotar la pantalla y permite añadir películas
-class FilmViewModel : ViewModel() {
+class FilmViewModel_old : ViewModel() {
 
     // Lista observable para que Compose reconozca cambios
     val films = mutableStateListOf<Film>().apply {

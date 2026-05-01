@@ -1,6 +1,6 @@
 package com.campusdigitalfp.filmoteca.common
 
-data class Film(
+data class Film_old(
     var id: Int = 0,
     var imageResId: Int = 0, // Propiedades de la clase
     var title: String? = null,
