@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.campusdigitalfp.filmoteca.common.FilmDataSource
 
 import com.campusdigitalfp.filmoteca.common.Logger
 import com.campusdigitalfp.filmoteca.navigation.Navigation
@@ -39,8 +38,7 @@ class MainActivity : ComponentActivity() {
         // Limpiar logs de ejecuciones antiguas
         Logger.clearLogs(this)
         setContent {
-            // Crea una instancia de HabitViewModel
-            val viewmodel: FilmViewModel = viewModel()
+            val viewModel: FilmViewModel = viewModel()
 
             //Se inicia la navegacion en la app y pasa el viewmodel
             Navigation(viewModel)

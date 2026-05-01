@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.R
-import com.campusdigitalfp.filmoteca.common.FilmDataSource
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 import com.campusdigitalfp.filmoteca.models.Film
 import com.campusdigitalfp.filmoteca.navigation.NavRoutes
