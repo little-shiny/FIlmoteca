@@ -45,17 +45,16 @@ android {
 
 dependencies {
 
-    // Core (versiones reales)
+    // Core
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.4")
     implementation("androidx.activity:activity-compose:1.9.2")
 
-    // Compose BOM (válido)
+    // Compose BOM
     implementation(platform("androidx.compose:compose-bom:2024.09.00"))
-    implementation("com.google.firebase:firebase-storage-ktx:22.0.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.09.00"))
 
-    // Compose
+    // Compose UI
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -74,11 +73,21 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Firebase (BOM correcto)
+    // Firebase BOM
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
-
-    // Firebase Auth
     implementation("com.google.firebase:firebase-auth:24.0.1")
+
+    // Firebase Storage — para subir imágenes capturadas con la cámara
+    implementation("com.google.firebase:firebase-storage-ktx")
+
+    // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:21.5.1")
+
+    // Coil — carga y visualización de imágenes desde URL (Firebase Storage, etc.)
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // ExoPlayer (Media3) — reproducción de vídeo en AboutScreen
+    implementation("androidx.media3:media3-exoplayer:1.3.1")
+    implementation("androidx.media3:media3-ui:1.3.1")
 }
