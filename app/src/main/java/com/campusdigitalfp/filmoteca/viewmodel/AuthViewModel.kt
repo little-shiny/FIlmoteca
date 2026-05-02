@@ -63,7 +63,7 @@ class AuthViewModel : ViewModel() {
                     .setSupported(true)
                     // Reemplaza con el Web Client ID de tu proyecto en Firebase Console
                     // -> Authentication > Sign-in method > Google > Web client ID
-                    .setServerClientId("TU_WEB_CLIENT_ID")
+                    .setServerClientId("579991462040-47j30k8rke093ov130r5mjivp14ang74.apps.googleusercontent.com")
                     .setFilterByAuthorizedAccounts(false)
                     .build()
             )

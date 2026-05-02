@@ -11,101 +11,77 @@ import com.campusdigitalfp.filmoteca.viewmodel.AuthViewModel
 import com.campusdigitalfp.filmoteca.viewmodel.FilmViewModel
 import com.google.firebase.auth.FirebaseAuth
 
-/**
- * Enum NavRoutes define las rutas de navegación para la app
- * cada constante representa una pantalla y su abreviatura para la navegacion
- */
 enum class NavRoutes(val abreviatura: String) {
     LIST("list"),
     ABOUT("about"),
-    DETAILSFULL("details/{filmId}"),
+    DETAILSFULL("details/{peliculaId}"),
     DETAILS("details/"),
-    EDITFULL("edit/{filmId}"),
+    EDITFULL("edit/{peliculaId}"),
     EDIT("edit/"),
     NEW("new"),
-    LOGIN("login")
+    LOGIN("login"),
+    REGISTER("register")
 }
 
-/**
- * Navigation administra la navegacion de la app definiendo las rutas y vinculandolas con las pantallas
- * @param viewModel FilmViewModel proporciona los datos de las peliculas a las pantallas
- * @param authViewModel AuthViewModel que proporciona los datos de autenticación
- */
 @Composable
 fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
 
+    // La sesión persiste mientras FirebaseAuth tenga currentUser != null
     val startDestination =
         if (isUserLogged()) NavRoutes.LIST.abreviatura
         else NavRoutes.LOGIN.abreviatura
 
     NavHost(navController = navController, startDestination = startDestination) {
 
-        // Ruta para la pantalla del login
         composable(NavRoutes.LOGIN.abreviatura) {
+            // Si ya hay sesión activa, saltamos directamente a la lista
             if (isUserLogged())
-            // Pasamos el viewModel recibido, no una instancia nueva
                 filmListScreen(navController, viewModel = viewModel)
             else
                 loginScreen(navController, authViewModel)
         }
 
-        // Ruta para la pantalla de registro
-        composable("register") {
+        composable(NavRoutes.REGISTER.abreviatura) {
             registerScreen(navController, authViewModel)
         }
 
-        // Ruta para la pantalla principal de la lista de peliculas
         composable(NavRoutes.LIST.abreviatura) {
-            // Pasamos el viewModel recibido
+            // Recarga las películas del usuario autenticado cada vez que se llega aquí
+            viewModel.loadFilms()
             filmListScreen(navController, viewModel = viewModel)
         }
 
-        // Ruta para la pantalla de about
         composable(NavRoutes.ABOUT.abreviatura) {
             AboutScreen(navController)
         }
 
-        /**
-         * Ruta para ver los detalles de una película.
-         * Extrae la ID desde los argumentos y la busca en la lista del viewModel.
-         */
         composable(NavRoutes.DETAILSFULL.abreviatura) { backStackEntry ->
-            val filmId = backStackEntry.arguments?.getString("filmId")
+            val filmId = backStackEntry.arguments?.getString("peliculaId")
             val films by viewModel.films.collectAsState()
             val film = films.find { it.id == filmId }
 
             if (isUserLogged()) {
-                film?.let {
-                    // Pasamos la película encontrada y la instancia del viewModel recibida
-                    filmDataScreen(navController, it, viewModel)
-                }
+                film?.let { filmDataScreen(navController, it, viewModel) }
             } else {
                 loginScreen(navController, authViewModel)
             }
         }
 
-        /**
-         * Ruta para la pantalla de edición de una pelicula.
-         */
         composable(NavRoutes.EDITFULL.abreviatura) { backStackEntry ->
-            val filmId = backStackEntry.arguments?.getString("filmId") // Corregido de "filmId"
+            val filmId = backStackEntry.arguments?.getString("peliculaId")
             val films by viewModel.films.collectAsState()
             val film = films.find { it.id == filmId }
 
             if (isUserLogged()) {
-                film?.let {
-                    filmEditScreen(navController, it, viewModel)
-                }
+                film?.let { filmEditScreen(navController, it, viewModel) }
             } else {
                 loginScreen(navController, authViewModel)
             }
         }
 
-        // Ruta para la pantalla de creación de una nueva pelicula
         composable(NavRoutes.NEW.abreviatura) {
             if (isUserLogged()) {
-
                 NewFilmScreen(navController, viewModel)
             } else {
                 loginScreen(navController, authViewModel)
@@ -115,9 +91,7 @@ fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
 }
 
 /**
- * Función que verifica si hay un usuario autenticado en Firebase Auth
- * @return true si hay un usuario autenticado
+ * Verifica si hay un usuario autenticado en Firebase.
+ * La sesión persiste automáticamente entre reinicios de app gracias a Firebase Auth.
  */
-fun isUserLogged(): Boolean {
-    return FirebaseAuth.getInstance().currentUser != null
-}
+fun isUserLogged(): Boolean = FirebaseAuth.getInstance().currentUser != null
