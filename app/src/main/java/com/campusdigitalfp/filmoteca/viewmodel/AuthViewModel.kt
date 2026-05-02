@@ -1,151 +1,149 @@
 package com.campusdigitalfp.filmoteca.viewmodel
 
-import android.app.Activity
-import android.app.Application
-import android.content.Intent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.AndroidViewModel
+import android.content.Context
+import androidx.lifecycle.ViewModel
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInCredential
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
 
-/**
- * Clase utilizada para manejar la autenticación dentro de la aplicación
- * Su objetivo es separar la lógica de la autenticación de la interfaz de usuario
- * etiende AndroidViewModel para proporcionar el acceso al contesto de la app
- */
-class AuthViewModel (application: Application): AndroidViewModel(application) {
+class AuthViewModel : ViewModel() {
+
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    fun registerUser(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
-        // Inicia el proceso de la creación de un usuario y contraseña en firebase auth
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                // Se añade un listener para detectar cuando acaba el proceso
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    // Si hay error
-                    val errorMessage = translateErrorFirebase(task.exception)
-                    onResult(false, errorMessage)
-                }
-            }
-    }
+    // Estado del usuario actual — null significa no autenticado
+    private val _currentUser = MutableStateFlow<FirebaseUser?>(auth.currentUser)
+    val currentUser: StateFlow<FirebaseUser?> = _currentUser
 
-    private fun translateErrorFirebase(exception: Exception?): String {
-        // Se verifica el tipo de excepcion
-        return when ((exception as? FirebaseAuthException)?.errorCode) {
-            "ERROR_INVALID_EMAIL" -> "El email no tiene un formato válido"
-            "ERROR_WRONG_PASSWORD" -> "La contraseña es incorrecta o el usuario no tiene contraseña"
-            "ERROR_USER_NOT_FOUND" -> "No existe una cuenta con este corre o."
-            "ERROR_USER_DISABLED" -> "Esta cuenta ha sido deshabilitada."
-            "ERROR_TOO_MANY_REQUESTS" -> "Has realizado demasiados intent os, intenta más tarde."
-            "ERROR_EMAIL_ALREADY_IN_USE" -> "Este correo ya está registrado en otra cuenta."
-            "ERROR_NETWORK_REQUEST_FAILED" -> "No se pudo conectar a la r ed. Verifica tu conexión."
-            "ERROR_WEAK_PASSWORD" -> "La contraseña es demasiado débil. U sa una más segura."
-            "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL" -> "Este correo ya está registrado con otro método de inicio de sesión."
-            else -> "Ocurrió un error desconocido, Intente nuevamente"
+    // ── Email y contraseña ────────────────────────────────────────────────────
+
+    /**
+     * Inicia sesión con email y contraseña.
+     * @return null si fue exitoso, o el mensaje de error traducido
+     */
+    suspend fun loginWithEmail(email: String, password: String): String? {
+        return try {
+            auth.signInWithEmailAndPassword(email, password).await()
+            _currentUser.value = auth.currentUser
+            null
+        } catch (e: Exception) {
+            translateFirebaseError(e.message)
         }
     }
 
     /**
-     * Inicio de sesión
+     * Registra un nuevo usuario con email y contraseña.
+     * @return null si fue exitoso, o el mensaje de error traducido
      */
-    fun loginUser(email: String?, password: String?, onResult: (Boolean, String?) -> Unit) {
-        if (email.isNullOrBlank() || password.isNullOrBlank()) {
-            onResult(false, "El correo y la contraseña no pueden estar vacíos.")
-            return
+    suspend fun registerWithEmail(email: String, password: String): String? {
+        return try {
+            auth.createUserWithEmailAndPassword(email, password).await()
+            _currentUser.value = auth.currentUser
+            null
+        } catch (e: Exception) {
+            translateFirebaseError(e.message)
         }
-        auth.signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onResult(true, null)
-                } else {
-                    val errorMessage = translateErrorFirebase(task.exception)
-                    onResult(false, errorMessage)
-                }
-            }
     }
 
-    // ------------------------------------------------------------------------
-    //                      GOOGLE SIGN ONETAP
-    // ------------------------------------------------------------------------
-    /**
-     * Inicio de sesión con Google (OneTap, solo funciona con cuentas registradas en el dispositivo)
-     * Si no hay, no funciona
-     */
-    // Se crea una instancia de BeginSignInRequest para iniciar el proceso de autenticación con Google
-    private val signInRequest = BeginSignInRequest.builder()
-        .setGoogleIdTokenRequestOptions(
-
-    // Configuración de la solicitud de to ken de ID de Google
-    BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-        .setSupported(true)
-        // Habilita el soporte para autenticación con Google
-        .setServerClientId("579991462040-47j30k8rke093ov130r5mjivp14ang74.apps.googleusercontent.com")
-        // Establece el Client ID del servidor, necesario para verificar el token de ID en el backend
-        .setFilterByAuthorizedAccounts(false)
-        // Permite mostrar todas las cuentas de Google disponibles en el dis positivo, en lugar de restringirse solo
-        // a cuentas que ya han iniciado sesión previamente en la app
-        .build()
-        // Construye la configuración de solicitud de token de Google
-        )
-    .build()
-
-    // ------------------------------------------------------------------------
-    //                      GOOGLE SIGN IN TRADICIONAL
-    // ------------------------------------------------------------------------
+    // ── Google Sign-In ────────────────────────────────────────────────────────
 
     /**
-     * Configuración del cliente de Google Sign-in
+     * Construye el BeginSignInRequest y devuelve el IntentSenderRequest para lanzar el flujo de Google.
+     * Devuelve null si no se puede iniciar (p.ej. no hay cuentas Google en el dispositivo).
      */
-    val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient( application,
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("579991462040-47j30k8rke093ov130r5mjivp14ang74.apps.googleusercontent.com")
-            .requestEmail() // Solicita acceso al correo del usuario para identificarlo
+    suspend fun getGoogleSignInIntent(context: Context): androidx.activity.result.IntentSenderRequest? {
+        val signInRequest = BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    // Reemplaza con el Web Client ID de tu proyecto en Firebase Console
+                    // -> Authentication > Sign-in method > Google > Web client ID
+                    .setServerClientId("TU_WEB_CLIENT_ID")
+                    .setFilterByAuthorizedAccounts(false)
+                    .build()
+            )
+            .setAutoSelectEnabled(true)
             .build()
-    )
 
-    /**
-     * Inicia el flujo de autenticación con Google
-     */
-    fun signInWithGoogle(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
-        val signInIntent = googleSignInClient.signInIntent
-        // Obtiene el intent para iniciar sesión
-        launcher.launch(signInIntent)
-        // Lanza el intent de autenticación con Google
+        return try {
+            val result = Identity.getSignInClient(context).beginSignIn(signInRequest).await()
+            androidx.activity.result.IntentSenderRequest.Builder(
+                result.pendingIntent.intentSender
+            ).build()
+        } catch (e: Exception) {
+            null
+        }
     }
 
     /**
-     * Maneja el resultado de inicio de sesión con Google y lo autentica con firebase
+     * Autentica en Firebase con las credenciales de Google obtenidas del launcher.
+     * @return null si fue exitoso, o el mensaje de error traducido
      */
-    suspend fun handleGoogleSignInResult(data: Intent?):Boolean {
-        return try{
-            // Obtener la cuenta de Google desde el Intent de respuesta
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            val account = task.getResult(ApiException::class.java)
-            // Se obtiene la cuenta autenticada
-            val googleIdToken = account?.idToken
+    suspend fun handleGoogleSignIn(credential: SignInCredential): String? {
+        val googleIdToken = credential.googleIdToken
+            ?: return "No se pudo obtener el token de Google"
+        val firebaseCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
+        return try {
+            auth.signInWithCredential(firebaseCredential).await()
+            _currentUser.value = auth.currentUser
+            null
+        } catch (e: Exception) {
+            translateFirebaseError(e.message)
+        }
+    }
 
-            if (googleIdToken != null) {
-                val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
-                // Crea la credencial de Firebase
+    // ── Acceso anónimo ────────────────────────────────────────────────────────
 
-                // Autenticación en Firebase con la credencial de Google
-                auth.signInWithCredential(credential).await()
-                true
-                // Retorna `true` si la autenticación fue exitosa
-            } else {
-                false // No se obtuvo token, retorno `false`
-            }
-        } catch(e: ApiException){
-            false
+    /**
+     * Inicia sesión de forma anónima.
+     * @return null si fue exitoso, o el mensaje de error traducido
+     */
+    suspend fun signInAnonymously(): String? {
+        return try {
+            auth.signInAnonymously().await()
+            _currentUser.value = auth.currentUser
+            null
+        } catch (e: Exception) {
+            translateFirebaseError(e.message)
+        }
+    }
+
+    // ── Cerrar sesión ─────────────────────────────────────────────────────────
+
+    fun logout() {
+        auth.signOut()
+        _currentUser.value = null
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /** Devuelve el UID del usuario actual, o null si no está autenticado */
+    fun currentUserId(): String? = auth.currentUser?.uid
+
+    /** Traduce los mensajes de error de Firebase a español */
+    private fun translateFirebaseError(message: String?): String {
+        return when {
+            message == null -> "Error desconocido"
+            message.contains("email address is already in use") ->
+                "Este correo ya está registrado"
+            message.contains("badly formatted") ->
+                "El formato del correo no es válido"
+            message.contains("no user record") ||
+                    message.contains("user-not-found") ->
+                "No existe ninguna cuenta con este correo"
+            message.contains("password is invalid") ||
+                    message.contains("wrong-password") ->
+                "Contraseña incorrecta"
+            message.contains("too-many-requests") ->
+                "Demasiados intentos fallidos. Inténtalo más tarde"
+            message.contains("network") ->
+                "Error de red. Comprueba tu conexión"
+            else -> message
         }
     }
 }
