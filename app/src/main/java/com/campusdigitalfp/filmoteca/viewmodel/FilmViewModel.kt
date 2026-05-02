@@ -3,210 +3,96 @@ package com.campusdigitalfp.filmoteca.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.campusdigitalfp.filmoteca.models.Film
-import com.campusdigitalfp.filmoteca.repository.FilmRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
+class FilmViewModel : ViewModel() {
 
-/**
- * ViewModel que gestiona la logica de la app relacionada con las películas
- * Se comunica con el repositorio para poder realizar las operaciones en firestore
- */
-class FilmViewModel: ViewModel() {
-    // Instancia del repo
-    private val repository = FilmRepository()
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
-    // `_films`almacena la lista de peliculas para poder modificarse en una lista
     private val _films = MutableStateFlow<List<Film>>(emptyList())
+    val films: StateFlow<List<Film>> = _films
 
-    //`films`expone las peliculas a la ui sin permitir modificaciones directas
-    val films: StateFlow<List<Film>> get() = _films
+    // Referencia a la colección del usuario actual:
+    // /users/{uid}/films  →  cada usuario tiene sus propias películas
+    private fun userFilmsCollection() =
+        db.collection("users")
+            .document(auth.currentUser?.uid ?: "anonymous")
+            .collection("films")
 
-    // Se ejecuta al inicializar el viewmodel y activa le escucha de los cambios en firestore
-    init{
-        listenToFilms()
+    init {
+        loadFilms()
     }
 
-    /**
-     * Escucha los cambios en Firestore en tiempo real y se actualiza en la ui
-     */
-    private fun listenToFilms(){
-        repository.listenToFilmsUpdates { updatedFilms ->
-            _films.value = updatedFilms
-        }
-    }
+    // ── CRUD ──────────────────────────────────────────────────────────────────
 
-    /**
-     * Recupera la lista de peliculas desde fs y actualiza _films. Evita bloquear la ui
-     */
-    private fun fetchFilms(){
-        viewModelScope.launch{
-            _films.value = repository.getFilms()
-        }
-    }
-
-    /**
-     * Agrega una nueva pelicula a firestore y actualiza la lista de peliculas
-     */
-    fun addFilm(film: Film){
-        viewModelScope.launch{
-            repository.addFilm(film)
-            fetchFilms() // recarga la lista
-        }
-    }
-
-    /**
-     * Actualiza una pelicula en fs y recarga la lista de peliculas
-     */
-    fun updateFilm(film: Film){
+    /** Carga todas las películas del usuario autenticado desde Firestore */
+    fun loadFilms() {
         viewModelScope.launch {
-            repository.updateFilm(film)
-            fetchFilms()
-        }
-    }
-
-    /**
-     * Elimina una pelicula en firestore por su id y actualiza la lista
-     */
-    fun deleteFilm(filmId: String){
-        viewModelScope.launch{
-            repository.deleteFilm(filmId)
-            fetchFilms()
-        }
-    }
-
-    /**
-     * Agrega una lista de 10 películas de ejemplo a firestore
-     */
-    fun addExampleFilms(){
-        val films = listOf(
-            Film(
-                title = "Harry Potter y la piedra filosofal",
-                director = "Chris Columbus",
-                year = 2001,
-                imageResId = 1,
-                format = "DVD",
-                genre = "Action",
-                imbdUrl = "http://www.imdb.com/title/tt0241527",
-                comments = "Una aventura mágica en Hogwarts."
-            ),
-            Film(
-                title = "El Señor de los Anillos: La Comunidad del Anillo",
-                director = "Peter Jackson",
-                year = 2001,
-                imageResId = 2,
-                format = "Blu-ray",
-                genre = "Fantasy",
-                imbdUrl = "http://www.imdb.com/title/tt0120737",
-                comments = "Una épica aventura en la Tierra Media."
-            ),
-            Film(
-                title = "Inception",
-                director = "Christopher Nolan",
-                year = 2010,
-                imageResId = 3,
-                format = "Digital",
-                genre = "Sci-Fi",
-                imbdUrl = "http://www.imdb.com/title/tt1375666",
-                comments = "Un viaje dentro de los sueños y la mente."
-            ),
-            Film(
-                title = "Titanic",
-                director = "James Cameron",
-                year = 1997,
-                imageResId = 4,
-                format = "DVD",
-                genre = "Romance",
-                imbdUrl = "http://www.imdb.com/title/tt0120338",
-                comments = "Una historia de amor en medio de una tragedia."
-            ),
-            Film(
-                title = "The Dark Knight",
-                director = "Christopher Nolan",
-                year = 2008,
-                imageResId = 5,
-                format = "Blu-ray",
-                genre = "Action",
-                imbdUrl = "http://www.imdb.com/title/tt0468569",
-                comments = "Batman enfrenta al Joker en Gotham."
-            ),
-            Film(
-                title = "Forrest Gump",
-                director = "Robert Zemeckis",
-                year = 1994,
-                imageResId = 6,
-                format = "DVD",
-                genre = "Drama",
-                imbdUrl = "http://www.imdb.com/title/tt0109830",
-                comments = "La vida extraordinaria de un hombre sencillo."
-            ),
-            Film(
-                title = "The Matrix",
-                director = "Lana Wachowski, Lilly Wachowski",
-                year = 1999,
-                imageResId = 7,
-                format = "Digital",
-                genre = "Sci-Fi",
-                imbdUrl = "http://www.imdb.com/title/tt0133093",
-                comments = "Una realidad simulada que oculta la verdad."
-            ),
-            Film(
-                title = "Gladiator",
-                director = "Ridley Scott",
-                year = 2000,
-                imageResId = 8,
-                format = "Blu-ray",
-                genre = "Action",
-                imbdUrl = "http://www.imdb.com/title/tt0172495",
-                comments = "Venganza y honor en la antigua Roma."
-            ),
-            Film(
-                title = "Avatar",
-                director = "James Cameron",
-                year = 2009,
-                imageResId = 9,
-                format = "Digital",
-                genre = "Sci-Fi",
-                imbdUrl = "http://www.imdb.com/title/tt0499549",
-                comments = "Un mundo alienígena lleno de vida y conflictos."
-            ),
-            Film(
-                title = "Jurassic Park",
-                director = "Steven Spielberg",
-                year = 1993,
-                imageResId = 10,
-                format = "DVD",
-                genre = "Adventure",
-                imbdUrl = "http://www.imdb.com/title/tt0107290",
-                comments = "Dinosaurios traídos de vuelta a la vida."
-            ),
-            Film(
-                title = "The Shawshank Redemption",
-                director = "Frank Darabont",
-                year = 1994,
-                imageResId = 11,
-                format = "Blu-ray",
-                genre = "Drama",
-                imbdUrl = "http://www.imdb.com/title/tt0111161",
-                comments = "Esperanza y amistad dentro de una prisión."
-            )
-        )
-        viewModelScope.launch {
-            films.forEach { film ->
-                repository.addFilm(film)
+            try {
+                val snapshot = userFilmsCollection().get().await()
+                _films.value = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(Film::class.java)?.copy(id = doc.id)
+                }
+            } catch (e: Exception) {
+                _films.value = emptyList()
             }
         }
     }
 
-    /**
-     * Elimina múltiples películas seleccionadas en una sola operacion en firestore
-     * Actualiza despues la lista de peliculas
-     */
-    fun deleteSelectedFilms(selectedFilms: List<Film>){
+    /** Añade una película nueva a la colección del usuario */
+    fun addFilm(film: Film) {
         viewModelScope.launch {
-            repository.deleteMultipleFilms(selectedFilms)
-            fetchFilms()
+            try {
+                val docRef = userFilmsCollection().add(film).await()
+                // Actualiza la lista local añadiendo la película con su id de Firestore
+                _films.value = _films.value + film.copy(id = docRef.id)
+            } catch (e: Exception) {
+                // Manejo de error: se puede exponer con otro StateFlow si se necesita
+            }
+        }
+    }
+
+    /** Actualiza una película existente */
+    fun updateFilm(film: Film) {
+        viewModelScope.launch {
+            try {
+                userFilmsCollection().document(film.id).set(film).await()
+                _films.value = _films.value.map { if (it.id == film.id) film else it }
+            } catch (e: Exception) {
+                // Manejo de error
+            }
+        }
+    }
+
+    /** Elimina una película por su id */
+    fun deleteFilm(filmId: String) {
+        viewModelScope.launch {
+            try {
+                userFilmsCollection().document(filmId).delete().await()
+                _films.value = _films.value.filter { it.id != filmId }
+            } catch (e: Exception) {
+                // Manejo de error
+            }
+        }
+    }
+
+    /** Elimina varias películas a la vez */
+    fun deleteFilmsByIds(ids: List<String>) {
+        viewModelScope.launch {
+            try {
+                ids.forEach { id ->
+                    userFilmsCollection().document(id).delete().await()
+                }
+                _films.value = _films.value.filter { it.id !in ids }
+            } catch (e: Exception) {
+                // Manejo de error
+            }
         }
     }
 }
