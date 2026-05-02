@@ -1,10 +1,19 @@
 package com.campusdigitalfp.filmoteca.viewmodel
 
+import android.app.Activity
 import android.app.Application
+import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.AndroidViewModel
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.tasks.await
 
 /**
  * Clase utilizada para manejar la autenticación dentro de la aplicación
@@ -64,6 +73,9 @@ class AuthViewModel (application: Application): AndroidViewModel(application) {
             }
     }
 
+    // ------------------------------------------------------------------------
+    //                      GOOGLE SIGN ONETAP
+    // ------------------------------------------------------------------------
     /**
      * Inicio de sesión con Google (OneTap, solo funciona con cuentas registradas en el dispositivo)
      * Si no hay, no funciona
@@ -86,5 +98,54 @@ class AuthViewModel (application: Application): AndroidViewModel(application) {
         )
     .build()
 
+    // ------------------------------------------------------------------------
+    //                      GOOGLE SIGN IN TRADICIONAL
+    // ------------------------------------------------------------------------
 
+    /**
+     * Configuración del cliente de Google Sign-in
+     */
+    val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient( application,
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("579991462040-47j30k8rke093ov130r5mjivp14ang74.apps.googleusercontent.com")
+            .requestEmail() // Solicita acceso al correo del usuario para identificarlo
+            .build()
+    )
+
+    /**
+     * Inicia el flujo de autenticación con Google
+     */
+    fun signInWithGoogle(activity: Activity, launcher: ActivityResultLauncher<Intent>) {
+        val signInIntent = googleSignInClient.signInIntent
+        // Obtiene el intent para iniciar sesión
+        launcher.launch(signInIntent)
+        // Lanza el intent de autenticación con Google
+    }
+
+    /**
+     * Maneja el resultado de inicio de sesión con Google y lo autentica con firebase
+     */
+    suspend fun handleGoogleSignInResult(data: Intent?):Boolean {
+        return try{
+            // Obtener la cuenta de Google desde el Intent de respuesta
+            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+            val account = task.getResult(ApiException::class.java)
+            // Se obtiene la cuenta autenticada
+            val googleIdToken = account?.idToken
+
+            if (googleIdToken != null) {
+                val credential = GoogleAuthProvider.getCredential(googleIdToken, null)
+                // Crea la credencial de Firebase
+
+                // Autenticación en Firebase con la credencial de Google
+                auth.signInWithCredential(credential).await()
+                true
+                // Retorna `true` si la autenticación fue exitosa
+            } else {
+                false // No se obtuvo token, retorno `false`
+            }
+        } catch(e: ApiException){
+            false
+        }
+    }
 }
