@@ -1,8 +1,6 @@
 package com.campusdigitalfp.filmoteca.screens
 
-import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,67 +15,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.viewmodel.AuthViewModel
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SignInClient
-import com.google.android.gms.auth.api.identity.SignInCredential
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-
-// ── Variables globales de autenticación ──────────────────────────────────────
-
-private lateinit var oneTapClient: SignInClient
-private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
-fun initGoogleSignIn(context: Context) {
-    oneTapClient = Identity.getSignInClient(context)
-}
-
-// ── Funciones suspendidas ─────────────────────────────────────────────────────
-
-suspend fun signInWithGoogle(context: Context): IntentSenderRequest? {
-    // Construye el BeginSignInRequest directamente aquí, sin necesitar parámetro externo
-    val signInRequest = com.google.android.gms.auth.api.identity.BeginSignInRequest.builder()
-        .setGoogleIdTokenRequestOptions(
-            com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
-                .setSupported(true)
-                .setServerClientId("TU_WEB_CLIENT_ID") // Reemplaza con tu Web Client ID de Firebase
-                .setFilterByAuthorizedAccounts(false)
-                .build()
-        )
-        .setAutoSelectEnabled(true)
-        .build()
-
-    val client = Identity.getSignInClient(context)
-    return try {
-        val result = client.beginSignIn(signInRequest).await()
-        IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
-    } catch (e: Exception) {
-        null
-    }
-}
-
-suspend fun handleGoogleSignInResult(credential: SignInCredential): Boolean {
-    val googleIdToken = credential.googleIdToken ?: return false
-    val firebaseCredential = GoogleAuthProvider.getCredential(googleIdToken, null)
-    return try {
-        auth.signInWithCredential(firebaseCredential).await()
-        true
-    } catch (e: Exception) {
-        false
-    }
-}
-
-fun logout() {
-    auth.signOut()
-}
-
-// ── Pantalla de Login ─────────────────────────────────────────────────────────
 
 @Composable
 fun loginScreen(
     navController: NavHostController,
-    authViewModel: AuthViewModel          // recibe el AuthViewModel igual que Navigation.kt espera
+    authViewModel: AuthViewModel
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -87,7 +30,12 @@ fun loginScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
-    // Launcher para el resultado del intent de Google Sign-In
+    fun goToList() {
+        navController.navigate("list") {
+            popUpTo("login") { inclusive = true }
+        }
+    }
+
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
@@ -96,15 +44,8 @@ fun loginScreen(
                 try {
                     val credential = Identity.getSignInClient(context)
                         .getSignInCredentialFromIntent(result.data)
-                    val success = handleGoogleSignInResult(credential)
-                    if (success) {
-                        // Usamos "list" que es la ruta definida en NavRoutes.LIST
-                        navController.navigate("list") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    } else {
-                        errorMessage = "Error al autenticar con Google"
-                    }
+                    val error = authViewModel.handleGoogleSignIn(credential)
+                    if (error == null) goToList() else errorMessage = error
                 } catch (e: Exception) {
                     errorMessage = "Error al obtener credenciales: ${e.message}"
                 } finally {
@@ -117,8 +58,6 @@ fun loginScreen(
         }
     }
 
-    // ── UI ────────────────────────────────────────────────────────────────────
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -126,86 +65,61 @@ fun loginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // Título
         Text(
             text = "Filmoteca",
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.primary
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
         Text(
             text = "Inicia sesión para continuar",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Campo email
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = { email = it; errorMessage = null },
             label = { Text("Correo electrónico") },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Email
-            ),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo contraseña
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { password = it; errorMessage = null },
             label = { Text("Contraseña") },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Password
-            ),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón email/contraseña
+        // Email / contraseña
         Button(
             onClick = {
                 isLoading = true
                 scope.launch {
-                    try {
-                        auth.signInWithEmailAndPassword(email, password).await()
-                        // Navegamos a "list" y limpiamos el backstack para que no se
-                        // pueda volver al login con el botón atrás
-                        navController.navigate("list") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    } catch (e: Exception) {
-                        errorMessage = e.message ?: "Error al iniciar sesión"
-                    } finally {
-                        isLoading = false
-                    }
+                    val error = authViewModel.loginWithEmail(email, password)
+                    isLoading = false
+                    if (error == null) goToList() else errorMessage = error
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
-        ) {
-            Text("Iniciar Sesión")
-        }
+        ) { Text("Iniciar Sesión") }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón Google — signInWithGoogle ahora recibe context, sin parámetro externo
+        // Google
         OutlinedButton(
             onClick = {
                 isLoading = true
                 scope.launch {
-                    val intentSenderRequest = signInWithGoogle(context)
+                    val intentSenderRequest = authViewModel.getGoogleSignInIntent(context)
                     if (intentSenderRequest != null) {
                         googleSignInLauncher.launch(intentSenderRequest)
                     } else {
@@ -216,57 +130,39 @@ fun loginScreen(
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
-        ) {
-            Text("Iniciar Sesión con Google")
-        }
+        ) { Text("Iniciar Sesión con Google") }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón anónimo
+        // Anónimo
         TextButton(
             onClick = {
                 isLoading = true
                 scope.launch {
-                    try {
-                        auth.signInAnonymously().await()
-                        navController.navigate("list") {
-                            popUpTo("login") { inclusive = true }
-                        }
-                    } catch (e: Exception) {
-                        errorMessage = e.message ?: "Error al acceder como invitado"
-                    } finally {
-                        isLoading = false
-                    }
+                    val error = authViewModel.signInAnonymously()
+                    isLoading = false
+                    if (error == null) goToList() else errorMessage = error
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
         ) {
-            Text(
-                "Acceder como invitado",
-                color = MaterialTheme.colorScheme.secondary
-            )
+            Text("Acceder como invitado", color = MaterialTheme.colorScheme.secondary)
         }
 
-        // Indicador de carga
         if (isLoading) {
             Spacer(modifier = Modifier.height(16.dp))
             CircularProgressIndicator()
         }
 
-        // Mensaje de error
         errorMessage?.let {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(it, color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Ir a registro
         TextButton(onClick = { navController.navigate("register") }) {
             Text("¿No tienes cuenta? Regístrate")
         }
