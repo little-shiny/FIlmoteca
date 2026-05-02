@@ -1,6 +1,7 @@
 package com.campusdigitalfp.filmoteca.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
@@ -27,19 +28,18 @@ enum class NavRoutes(val abreviatura: String) {
 fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
 
-    // La sesión persiste mientras FirebaseAuth tenga currentUser != null
+    // Observamos el usuario desde AuthViewModel (reactivo, no estático)
+    val currentUser by authViewModel.currentUser.collectAsState()
+
     val startDestination =
-        if (isUserLogged()) NavRoutes.LIST.abreviatura
+        if (currentUser != null) NavRoutes.LIST.abreviatura
         else NavRoutes.LOGIN.abreviatura
 
     NavHost(navController = navController, startDestination = startDestination) {
 
         composable(NavRoutes.LOGIN.abreviatura) {
-            // Si ya hay sesión activa, saltamos directamente a la lista
-            if (isUserLogged())
-                filmListScreen(navController, viewModel = viewModel)
-            else
-                loginScreen(navController, authViewModel)
+
+            loginScreen(navController, authViewModel)
         }
 
         composable(NavRoutes.REGISTER.abreviatura) {
@@ -47,8 +47,13 @@ fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
         }
 
         composable(NavRoutes.LIST.abreviatura) {
-            // Recarga las películas del usuario autenticado cada vez que se llega aquí
-            viewModel.loadFilms()
+            // Clave = uid del usuario. Si el uid cambia (login/logout/cambio de cuenta)
+            // el efecto se re-ejecuta y recarga las películas del nuevo usuario.
+            LaunchedEffect(currentUser?.uid) {
+                if (currentUser != null) {
+                    viewModel.loadFilms()
+                }
+            }
             filmListScreen(navController, viewModel = viewModel)
         }
 
@@ -61,7 +66,7 @@ fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
             val films by viewModel.films.collectAsState()
             val film = films.find { it.id == filmId }
 
-            if (isUserLogged()) {
+            if (currentUser != null) {
                 film?.let { filmDataScreen(navController, it, viewModel) }
             } else {
                 loginScreen(navController, authViewModel)
@@ -73,7 +78,7 @@ fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
             val films by viewModel.films.collectAsState()
             val film = films.find { it.id == filmId }
 
-            if (isUserLogged()) {
+            if (currentUser != null) {
                 film?.let { filmEditScreen(navController, it, viewModel) }
             } else {
                 loginScreen(navController, authViewModel)
@@ -81,7 +86,7 @@ fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
         }
 
         composable(NavRoutes.NEW.abreviatura) {
-            if (isUserLogged()) {
+            if (currentUser != null) {
                 NewFilmScreen(navController, viewModel)
             } else {
                 loginScreen(navController, authViewModel)
@@ -90,8 +95,4 @@ fun Navigation(viewModel: FilmViewModel, authViewModel: AuthViewModel) {
     }
 }
 
-/**
- * Verifica si hay un usuario autenticado en Firebase.
- * La sesión persiste automáticamente entre reinicios de app gracias a Firebase Auth.
- */
 fun isUserLogged(): Boolean = FirebaseAuth.getInstance().currentUser != null

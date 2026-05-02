@@ -1,8 +1,7 @@
 {
   "project_info": {
     "project_number": "579991462040",
-    "project_id": "com-campusdigitalfp-filmoteca",
-    "storage_bucket": "com-campusdigitalfp-filmoteca.firebasestorage.app"
+    "project_id": "com-campusdigitalfp-filmoteca"
   },
   "client": [
     {
