@@ -15,6 +15,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.campusdigitalfp.filmoteca.viewmodel.AuthViewModel
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -62,9 +63,9 @@ fun logout() {
 // ── Pantalla de Login ─────────────────────────────────────────────────────────
 
 @Composable
-fun LoginScreen(
+fun loginScreen(
     navController: NavHostController,
-    signInRequest: BeginSignInRequest
+    authViewModel: AuthViewModel
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
