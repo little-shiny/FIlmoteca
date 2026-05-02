@@ -73,21 +73,18 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
-    // Firebase BOM
-    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    // ── Firebase ──────────────────────────────────────────────────────────────
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-auth:24.0.1")
-
-    // Firebase Storage — para subir imágenes capturadas con la cámara
-    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")
 
     // Google Sign-In
-    implementation("com.google.android.gms:play-services-auth:21.5.1")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
-    // Coil — carga y visualización de imágenes desde URL (Firebase Storage, etc.)
+    // ── Coil — carga de imágenes desde URL ───────────────────────────────────
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // ExoPlayer (Media3) — reproducción de vídeo en AboutScreen
+    // ── ExoPlayer (Media3) — reproducción de vídeo ───────────────────────────
     implementation("androidx.media3:media3-exoplayer:1.3.1")
     implementation("androidx.media3:media3-ui:1.3.1")
 }

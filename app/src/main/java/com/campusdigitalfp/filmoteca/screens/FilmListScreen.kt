@@ -8,31 +8,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.*
-import com.campusdigitalfp.filmoteca.common.barraSuperior
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.campusdigitalfp.filmoteca.R
+import com.campusdigitalfp.filmoteca.common.FilmImageThumbnail
+import com.campusdigitalfp.filmoteca.common.barraSuperior
 import com.campusdigitalfp.filmoteca.models.Film
 import com.campusdigitalfp.filmoteca.navigation.NavRoutes
 import com.campusdigitalfp.filmoteca.ui.theme.FilmotecaTheme
 import com.campusdigitalfp.filmoteca.viewmodel.FilmViewModel
 
-/**
- * Pantalla principal que muestra la lista de películas.
- * Cada elemento muestra la miniatura si la película tiene imagen,
- * o el icono predeterminado en caso contrario.
- */
 @Composable
 fun filmListScreen(navController: NavHostController, viewModel: FilmViewModel = viewModel()) {
 
@@ -40,12 +33,10 @@ fun filmListScreen(navController: NavHostController, viewModel: FilmViewModel = 
     val selectedFilms = remember { mutableStateListOf<Film>() }
     val films by viewModel.films.collectAsState()
 
-    // Mensajes temporales via NavController
     navController.currentBackStackEntry?.savedStateHandle?.let {
         val context = LocalContext.current
         val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
         val result = savedStateHandle?.get<String>("key_result")
-
         LaunchedEffect(result) {
             result?.let {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -66,21 +57,12 @@ fun filmListScreen(navController: NavHostController, viewModel: FilmViewModel = 
             }
         ) { paddingValues ->
             Column(modifier = Modifier.padding(paddingValues)) {
-                ViewFilmList(
-                    films,
-                    navController,
-                    isActionMode,
-                    selectedFilms
-                )
+                ViewFilmList(films, navController, isActionMode, selectedFilms)
             }
         }
     }
 }
 
-/**
- * Fila individual de película en la lista.
- * Muestra la miniatura (desde URL o icono de reserva), el título y los comentarios.
- */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ViewFilm(
@@ -95,45 +77,24 @@ fun ViewFilm(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Miniatura: icono de seleccionado, imagen de Firebase o icono predeterminado
-        when {
-            isSelected -> {
-                Image(
-                    painter = painterResource(R.drawable.baseline_check_24),
-                    contentDescription = "Seleccionada",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                )
-            }
-            film.imageUrl.isNotEmpty() -> {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(film.imageUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Portada de ${film.title}",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                )
-            }
-            else -> {
-                Image(
-                    painter = painterResource(R.drawable.film),
-                    contentDescription = "Icono película",
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                )
-            }
+        // Miniatura: check si seleccionada, imagen local o icono por defecto
+        if (isSelected) {
+            Image(
+                painter = painterResource(R.drawable.baseline_check_24),
+                contentDescription = "Seleccionada",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            )
+        } else {
+            FilmImageThumbnail(
+                imageUrl = film.imageUrl,
+                modifier = Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            )
         }
 
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(Modifier.width(10.dp))
 
         var isExpanded by remember { mutableStateOf(false) }
         val surfaceColor by animateColorAsState(
@@ -147,14 +108,12 @@ fun ViewFilm(
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleSmall
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(Modifier.height(2.dp))
             Surface(
                 shape = MaterialTheme.shapes.medium,
                 shadowElevation = 1.dp,
                 color = surfaceColor,
-                modifier = Modifier
-                    .animateContentSize()
-                    .padding(1.dp)
+                modifier = Modifier.animateContentSize().padding(1.dp)
             ) {
                 Text(
                     text = film.comments,
@@ -167,9 +126,6 @@ fun ViewFilm(
     }
 }
 
-/**
- * LazyColumn con la lista completa de películas.
- */
 @Composable
 fun ViewFilmList(
     films: List<Film>,
@@ -178,9 +134,7 @@ fun ViewFilmList(
     selectedFilms: MutableList<Film>
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)
     ) {
         items(films) { film ->
             ViewFilm(
@@ -190,9 +144,7 @@ fun ViewFilmList(
                         if (selectedFilms.contains(film)) {
                             selectedFilms.remove(film)
                             if (selectedFilms.isEmpty()) isActionMode.value = false
-                        } else {
-                            selectedFilms.add(film)
-                        }
+                        } else selectedFilms.add(film)
                     } else {
                         navController.navigate(NavRoutes.DETAILS.abreviatura + film.id)
                     }

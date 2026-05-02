@@ -17,28 +17,21 @@ class FilmViewModel : ViewModel() {
     private val _films = MutableStateFlow<List<Film>>(emptyList())
     val films: StateFlow<List<Film>> = _films
 
-    /** Estado de carga de imagen (null = sin carga, true = cargando, false = terminado) */
+    /** true mientras se está guardando la imagen */
     private val _imageUploading = MutableStateFlow(false)
     val imageUploading: StateFlow<Boolean> = _imageUploading
 
-    init {
-        loadFilms()
-    }
+    init { loadFilms() }
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
-    /** Carga todas las películas del usuario desde Firestore */
     fun loadFilms() {
         viewModelScope.launch {
-            try {
-                _films.value = repository.getFilms()
-            } catch (e: Exception) {
-                _films.value = emptyList()
-            }
+            try { _films.value = repository.getFilms() }
+            catch (_: Exception) { _films.value = emptyList() }
         }
     }
 
-    /** Añade una nueva película */
     fun addFilm(film: Film) {
         viewModelScope.launch {
             try {
@@ -48,7 +41,6 @@ class FilmViewModel : ViewModel() {
         }
     }
 
-    /** Actualiza una película existente */
     fun updateFilm(film: Film) {
         viewModelScope.launch {
             try {
@@ -58,7 +50,6 @@ class FilmViewModel : ViewModel() {
         }
     }
 
-    /** Elimina una película por su id */
     fun deleteFilm(filmId: String) {
         viewModelScope.launch {
             try {
@@ -68,7 +59,6 @@ class FilmViewModel : ViewModel() {
         }
     }
 
-    /** Elimina varias películas seleccionadas */
     fun deleteSelectedFilms(films: List<Film>) {
         viewModelScope.launch {
             try {
@@ -79,34 +69,27 @@ class FilmViewModel : ViewModel() {
         }
     }
 
-    // ── Imagen ────────────────────────────────────────────────────────────────
+    // ── Imagen local ──────────────────────────────────────────────────────────
 
     /**
-     * Guarda la imagen localmente, la sube a Firebase Storage y actualiza
-     * el campo [imageUrl] del documento Firestore de la película.
-     *
-     * @param context   Contexto de la aplicación
-     * @param imageUri  URI de la imagen capturada por la cámara
-     * @param film      Película cuya imagen se actualizará
+     * Guarda la imagen capturada en el almacenamiento interno de la app
+     * y actualiza el campo imageUrl de la película en Firestore con la
+     * ruta absoluta local
      */
-    fun uploadFilmImage(context: Context, imageUri: Uri, film: Film) {
+    fun saveFilmImageLocally(context: Context, imageUri: Uri, film: Film) {
         viewModelScope.launch {
             _imageUploading.value = true
             try {
-                // Guardar localmente en el almacenamiento interno de la app
-                val localUri = repository.saveImageToAppFolder(context, imageUri)
+                // 1. Copiar al almacenamiento interno
+                val localPath = repository.saveImageLocally(context, imageUri)
                     ?: return@launch
 
-                // Subir a Firebase Storage y obtener la URL de descarga
-                val downloadUrl = repository.uploadImageToStorage(localUri, film.id)
-                    ?: return@launch
+                // 2. Persistir la ruta en Firestore
+                repository.updateFilmImageUrl(film.id, localPath)
 
-                // Actualizar el campo imageUrl en Firestore
-                repository.updateFilmImageUrl(film.id, downloadUrl)
-
-                //  Actualizar el estado local
-                val updatedFilm = film.copy(imageUrl = downloadUrl)
-                _films.value = _films.value.map { if (it.id == film.id) updatedFilm else it }
+                // 3. Actualizar el estado local para refrescar la UI
+                val updated = film.copy(imageUrl = localPath)
+                _films.value = _films.value.map { if (it.id == film.id) updated else it }
 
             } catch (_: Exception) {
             } finally {
