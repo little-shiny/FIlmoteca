@@ -16,7 +16,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.viewmodel.AuthViewModel
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.auth.api.identity.SignInCredential
@@ -36,9 +35,22 @@ fun initGoogleSignIn(context: Context) {
 
 // ── Funciones suspendidas ─────────────────────────────────────────────────────
 
-suspend fun signInWithGoogle(signInRequest: BeginSignInRequest): IntentSenderRequest? {
+suspend fun signInWithGoogle(context: Context): IntentSenderRequest? {
+    // Construye el BeginSignInRequest directamente aquí, sin necesitar parámetro externo
+    val signInRequest = com.google.android.gms.auth.api.identity.BeginSignInRequest.builder()
+        .setGoogleIdTokenRequestOptions(
+            com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                .setSupported(true)
+                .setServerClientId("TU_WEB_CLIENT_ID") // Reemplaza con tu Web Client ID de Firebase
+                .setFilterByAuthorizedAccounts(false)
+                .build()
+        )
+        .setAutoSelectEnabled(true)
+        .build()
+
+    val client = Identity.getSignInClient(context)
     return try {
-        val result = oneTapClient.beginSignIn(signInRequest).await()
+        val result = client.beginSignIn(signInRequest).await()
         IntentSenderRequest.Builder(result.pendingIntent.intentSender).build()
     } catch (e: Exception) {
         null
@@ -65,7 +77,7 @@ fun logout() {
 @Composable
 fun loginScreen(
     navController: NavHostController,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel          // recibe el AuthViewModel igual que Navigation.kt espera
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -86,7 +98,10 @@ fun loginScreen(
                         .getSignInCredentialFromIntent(result.data)
                     val success = handleGoogleSignInResult(credential)
                     if (success) {
-                        navController.navigate("FilmListScreen")
+                        // Usamos "list" que es la ruta definida en NavRoutes.LIST
+                        navController.navigate("list") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     } else {
                         errorMessage = "Error al autenticar con Google"
                     }
@@ -165,7 +180,11 @@ fun loginScreen(
                 scope.launch {
                     try {
                         auth.signInWithEmailAndPassword(email, password).await()
-                        navController.navigate("FilmListScreen")
+                        // Navegamos a "list" y limpiamos el backstack para que no se
+                        // pueda volver al login con el botón atrás
+                        navController.navigate("list") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     } catch (e: Exception) {
                         errorMessage = e.message ?: "Error al iniciar sesión"
                     } finally {
@@ -181,12 +200,12 @@ fun loginScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón Google
+        // Botón Google — signInWithGoogle ahora recibe context, sin parámetro externo
         OutlinedButton(
             onClick = {
                 isLoading = true
                 scope.launch {
-                    val intentSenderRequest = signInWithGoogle(signInRequest)
+                    val intentSenderRequest = signInWithGoogle(context)
                     if (intentSenderRequest != null) {
                         googleSignInLauncher.launch(intentSenderRequest)
                     } else {
@@ -210,7 +229,9 @@ fun loginScreen(
                 scope.launch {
                     try {
                         auth.signInAnonymously().await()
-                        navController.navigate("FilmListScreen")
+                        navController.navigate("list") {
+                            popUpTo("login") { inclusive = true }
+                        }
                     } catch (e: Exception) {
                         errorMessage = e.message ?: "Error al acceder como invitado"
                     } finally {
