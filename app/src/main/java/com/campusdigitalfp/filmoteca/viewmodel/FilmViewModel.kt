@@ -1,29 +1,25 @@
 package com.campusdigitalfp.filmoteca.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.campusdigitalfp.filmoteca.models.Film
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.campusdigitalfp.filmoteca.repository.FilmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 class FilmViewModel : ViewModel() {
 
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    private val repository = FilmRepository()
 
     private val _films = MutableStateFlow<List<Film>>(emptyList())
     val films: StateFlow<List<Film>> = _films
 
-    // Referencia a la colección del usuario actual:
-    // /users/{uid}/films  →  cada usuario tiene sus propias películas
-    private fun userFilmsCollection() =
-        db.collection("users")
-            .document(auth.currentUser?.uid ?: "anonymous")
-            .collection("films")
+    /** Estado de carga de imagen (null = sin carga, true = cargando, false = terminado) */
+    private val _imageUploading = MutableStateFlow(false)
+    val imageUploading: StateFlow<Boolean> = _imageUploading
 
     init {
         loadFilms()
@@ -31,30 +27,24 @@ class FilmViewModel : ViewModel() {
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
 
-    /** Carga todas las películas del usuario autenticado desde Firestore */
+    /** Carga todas las películas del usuario desde Firestore */
     fun loadFilms() {
         viewModelScope.launch {
             try {
-                val snapshot = userFilmsCollection().get().await()
-                _films.value = snapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Film::class.java)?.copy(id = doc.id)
-                }
+                _films.value = repository.getFilms()
             } catch (e: Exception) {
                 _films.value = emptyList()
             }
         }
     }
 
-    /** Añade una película nueva a la colección del usuario */
+    /** Añade una nueva película */
     fun addFilm(film: Film) {
         viewModelScope.launch {
             try {
-                val docRef = userFilmsCollection().add(film).await()
-                // Actualiza la lista local añadiendo la película con su id de Firestore
-                _films.value = _films.value + film.copy(id = docRef.id)
-            } catch (e: Exception) {
-                // Manejo de error: se puede exponer con otro StateFlow si se necesita
-            }
+                val id = repository.addFilm(film)
+                _films.value = _films.value + film.copy(id = id)
+            } catch (_: Exception) {}
         }
     }
 
@@ -62,11 +52,9 @@ class FilmViewModel : ViewModel() {
     fun updateFilm(film: Film) {
         viewModelScope.launch {
             try {
-                userFilmsCollection().document(film.id).set(film).await()
+                repository.updateFilm(film)
                 _films.value = _films.value.map { if (it.id == film.id) film else it }
-            } catch (e: Exception) {
-                // Manejo de error
-            }
+            } catch (_: Exception) {}
         }
     }
 
@@ -74,24 +62,55 @@ class FilmViewModel : ViewModel() {
     fun deleteFilm(filmId: String) {
         viewModelScope.launch {
             try {
-                userFilmsCollection().document(filmId).delete().await()
+                repository.deleteFilm(filmId)
                 _films.value = _films.value.filter { it.id != filmId }
-            } catch (e: Exception) {
-                // Manejo de error
-            }
+            } catch (_: Exception) {}
         }
     }
 
-    /** Elimina varias películas a la vez */
-    fun deleteFilmsByIds(ids: List<String>) {
+    /** Elimina varias películas seleccionadas */
+    fun deleteSelectedFilms(films: List<Film>) {
         viewModelScope.launch {
             try {
-                ids.forEach { id ->
-                    userFilmsCollection().document(id).delete().await()
-                }
+                repository.deleteMultipleFilms(films.map { it.id })
+                val ids = films.map { it.id }.toSet()
                 _films.value = _films.value.filter { it.id !in ids }
-            } catch (e: Exception) {
-                // Manejo de error
+            } catch (_: Exception) {}
+        }
+    }
+
+    // ── Imagen ────────────────────────────────────────────────────────────────
+
+    /**
+     * Guarda la imagen localmente, la sube a Firebase Storage y actualiza
+     * el campo [imageUrl] del documento Firestore de la película.
+     *
+     * @param context   Contexto de la aplicación
+     * @param imageUri  URI de la imagen capturada por la cámara
+     * @param film      Película cuya imagen se actualizará
+     */
+    fun uploadFilmImage(context: Context, imageUri: Uri, film: Film) {
+        viewModelScope.launch {
+            _imageUploading.value = true
+            try {
+                // Guardar localmente en el almacenamiento interno de la app
+                val localUri = repository.saveImageToAppFolder(context, imageUri)
+                    ?: return@launch
+
+                // Subir a Firebase Storage y obtener la URL de descarga
+                val downloadUrl = repository.uploadImageToStorage(localUri, film.id)
+                    ?: return@launch
+
+                // Actualizar el campo imageUrl en Firestore
+                repository.updateFilmImageUrl(film.id, downloadUrl)
+
+                //  Actualizar el estado local
+                val updatedFilm = film.copy(imageUrl = downloadUrl)
+                _films.value = _films.value.map { if (it.id == film.id) updatedFilm else it }
+
+            } catch (_: Exception) {
+            } finally {
+                _imageUploading.value = false
             }
         }
     }
