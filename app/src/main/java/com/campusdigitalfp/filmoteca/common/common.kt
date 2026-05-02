@@ -78,7 +78,6 @@ fun barraSuperior(
                     DropdownMenuItem(
                         onClick = {
                             expanded = false
-                            viewModel.addExampleFilms() // agrega peliculas predefinidas
                         },
                         leadingIcon = {
                             Icon(
