@@ -52,6 +52,7 @@ dependencies {
 
     // Compose BOM (válido)
     implementation(platform("androidx.compose:compose-bom:2024.09.00"))
+    implementation("com.google.firebase:firebase-storage-ktx:22.0.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.09.00"))
 
     // Compose

@@ -1,112 +1,143 @@
 package com.campusdigitalfp.filmoteca.repository
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import com.campusdigitalfp.filmoteca.models.Film
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * FilmRepository maneja las operaciones relacionadas con las películas en Firestore
- * Actúa como capa intermedia entre la BBDD y el ViewModel
+ * y las imágenes en Firebase Storage.
+ * Actúa como capa intermedia entre la BBDD y el ViewModel.
  */
 class FilmRepository {
-    //Obtención de una instancia de Firestore
-    private val db = FirebaseFirestore.getInstance()
-    // Referencia a la colección de `films` en firestore:
-    private val filmsCollection = db.collection("films")
 
-    /**
-     * Método que agrega una nueva película a Firestore
-     * se suspende para actuar en el fondo
-     */
-    suspend fun addFilm(film: Film){
-        filmsCollection.add(film).await()
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+
+    // Referencia dinámica a la colección del usuario autenticado
+    private fun userFilmsCollection() =
+        db.collection("users")
+            .document(auth.currentUser?.uid ?: "anonymous")
+            .collection("films")
+
+    // Referencia dinámica al bucket de Storage del usuario
+    private fun userStorageRef() =
+        storage.reference
+            .child("users/${auth.currentUser?.uid ?: "anonymous"}/films")
+
+    // ── CRUD Firestore ────────────────────────────────────────────────────────
+
+    /** Agrega una nueva película */
+    suspend fun addFilm(film: Film): String {
+        val docRef = userFilmsCollection().add(film).await()
+        return docRef.id
     }
 
-    /**
-     * Función que recupera las peliculas en Firestore y las devuleve como una lista
-     * usa Await() para esperar a que termine antes de seguir
-     * Si hay un error devuelve una lista vacia en luigar de una excepción
-     */
-    suspend fun getFilms(): List<Film>{
+    /** Recupera todas las películas del usuario */
+    suspend fun getFilms(): List<Film> {
         return try {
-            val snapshot = filmsCollection.get().await()
-
-            // Obtiene los resultados de firestore
-            snapshot.documents.mapNotNull {
-                it.toObject(Film::class.java)?.copy(id = it.id)
+            val snapshot = userFilmsCollection().get().await()
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(Film::class.java)?.copy(id = doc.id)
             }
-
         } catch (e: Exception) {
+            Log.e("FilmRepository", "Error al obtener películas: ${e.message}")
             emptyList()
         }
     }
 
-    /**
-     * Actualiza una pelicula en firestore
-     * usa set para sobreescribir los datos
-     */
-    suspend fun updateFilm(film: Film){
-        filmsCollection.document(film.id).set(film).await()
+    /** Actualiza una película existente */
+    suspend fun updateFilm(film: Film) {
+        userFilmsCollection().document(film.id).set(film).await()
     }
 
-    /**
-     * Elimina un habito en firestore mediante la id
-     */
-    suspend fun deleteFilm(filmId: String){
-        filmsCollection.document(filmId).delete().await()
+    /** Elimina una película por su id */
+    suspend fun deleteFilm(filmId: String) {
+        userFilmsCollection().document(filmId).delete().await()
     }
 
-    /**
-     * Escucha los cambios emn la coleccion de firestore para que cuando se detecte algun cambio en firestore se
-     * actualice pasandole al callback onUpodate
-     */
-    fun listenToFilmsUpdates(onUpdate: (List<Film>) -> Unit) {
-        filmsCollection.addSnapshotListener { snapshot, exception ->
-            if (exception != null) {
-                Log.e("HS_error", "Error al obtener películas : ${exception.message}")
-                return@addSnapshotListener
-            }
-            // Convierte las peliculas de firestore a objetos film
-            val films = snapshot?.documents?.mapNotNull { it.toObject(Film::class.java)?.copy(id = it.id) } ?: emptyList()
-            onUpdate(films) // Llama al callback con la lista actualizada
-        }
-    }
-
-    /**
-     * Agrega multiples peliculas en una operacion con writebach, optimizando el rendimiento
-     */
-    suspend fun addMultipleFilms(films: List<Film>){
+    /** Elimina varias películas en una sola operación batch */
+    suspend fun deleteMultipleFilms(ids: List<String>) {
         val batch = db.batch()
-
-        films.forEach{ film ->
-            val newDocRef = filmsCollection.document() // Crea un nuevo id para cada pelicula
-            batch.set(newDocRef, film.copy(id = newDocRef.id)) // Se guarda con su nueva id
+        ids.forEach { id ->
+            batch.delete(userFilmsCollection().document(id))
         }
-        try {
-            batch.commit().await() //ejecuta la operacion
-            Log.i("HS_info", "10 peliculas añadidas correctamente a Firestore")
-        } catch(e: Exception){
-            Log.e("Hs_error", "Error al añadir películas: ${e.message}")
-        }
-    }
-
-    /**
-     * Elimina multiples peliculas en una sola trasnaccion con batch
-     */
-    suspend fun deleteMultipleFilms(films: List<Film>){
-        val batch = db.batch()
-        films.forEach{ film ->
-            film.id.let{ filmId ->
-                batch.delete(filmsCollection.document(filmId))
-            }
-        }
-
         try {
             batch.commit().await()
-            Log.i("HS_info", "peliculas eliminadas correctamente")
-        }catch(e: Exception){
-            Log.e("HS_error", "Error al eliminar peliculas: ${e.message}")
+            Log.i("FilmRepository", "Películas eliminadas correctamente")
+        } catch (e: Exception) {
+            Log.e("FilmRepository", "Error al eliminar películas: ${e.message}")
         }
+    }
+
+    // ── Imagen ────────────────────────────────────────────────────────────────
+
+    /**
+     * Guarda la imagen en el almacenamiento interno de la app (carpeta privada).
+     * Devuelve la URI del archivo guardado, o null si hubo error.
+     */
+    fun saveImageToAppFolder(context: Context, imageUri: Uri): Uri? {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val directory = File(context.filesDir, "FilmImages")
+
+        if (!directory.exists() && !directory.mkdirs()) {
+            Log.e("FilmRepository", "No se pudo crear el directorio de imágenes")
+            return null
+        }
+
+        val file = File(directory, "IMG_$timeStamp.jpg")
+        return try {
+            context.contentResolver.openInputStream(imageUri)?.use { input ->
+                FileOutputStream(file).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            Uri.fromFile(file)
+        } catch (e: IOException) {
+            Log.e("FilmRepository", "Error al guardar la imagen localmente", e)
+            null
+        }
+    }
+
+    /**
+     * Sube la imagen al bucket de Firebase Storage asociado al usuario
+     * y devuelve la URL de descarga pública, o null si hubo error.
+     *
+     * @param localUri  URI del archivo local (obtenida de [saveImageToAppFolder])
+     * @param filmId    ID de la película a la que pertenece la imagen
+     */
+    suspend fun uploadImageToStorage(localUri: Uri, filmId: String): String? {
+        return try {
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val imageRef = userStorageRef().child("$filmId/IMG_$timeStamp.jpg")
+
+            imageRef.putFile(localUri).await()
+            val downloadUrl = imageRef.downloadUrl.await()
+            downloadUrl.toString()
+        } catch (e: Exception) {
+            Log.e("FilmRepository", "Error al subir imagen a Storage: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Actualiza únicamente el campo [imageUrl] del documento Firestore de la película.
+     */
+    suspend fun updateFilmImageUrl(filmId: String, imageUrl: String) {
+        userFilmsCollection().document(filmId)
+            .update("imageUrl", imageUrl)
+            .await()
     }
 }
