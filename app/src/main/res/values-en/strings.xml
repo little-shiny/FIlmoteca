@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Film Library</string>
+    <string name="app_name">Filmoteca</string>
     <string name="incidencia_con_filmoteca">Issue with film library</string>
     <string name="estado_seleccionado">Selected</string>
     <string name="estado_no_seleccionado">Not selected</string>

@@ -93,12 +93,9 @@ class FilmViewModel : ViewModel() {
             Film(title = "Gladiator", director = "Ridley Scott", year = 2000, genre = "Acción", format = "Blu-Ray", comments = "Honor y venganza en Roma.")
         )
         viewModelScope.launch {
-            try {
-                examples.forEach { film ->
-                    val id = repository.addFilm(film)
-                    _films.value = _films.value + film.copy(id = id)
-                }
-            } catch (_: Exception) {}
+            examples.forEach { film ->
+                addFilm(film)
+            }
         }
     }
 
