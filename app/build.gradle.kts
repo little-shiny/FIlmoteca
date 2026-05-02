@@ -76,4 +76,8 @@ dependencies {
     // Firebase (BOM correcto)
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Firebase Auth
+    implementation("com.google.firebase:firebase-auth:24.0.1")
+    implementation("com.google.android.gms:play-services-auth:21.5.1")
 }
