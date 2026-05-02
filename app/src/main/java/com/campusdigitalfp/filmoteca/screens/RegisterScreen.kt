@@ -11,9 +11,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.campusdigitalfp.filmoteca.viewmodel.AuthViewModel
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @Composable
 fun registerScreen(
@@ -28,7 +26,6 @@ fun registerScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
-    // Validación local antes de llamar a Firebase
     fun validate(): String? {
         if (email.isBlank()) return "El correo no puede estar vacío"
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches())
@@ -45,136 +42,86 @@ fun registerScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        // Título — mismo estilo que LoginScreen
         Text(
             text = "Filmoteca",
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.primary
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
         Text(
             text = "Crea tu cuenta",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Campo email
         OutlinedTextField(
             value = email,
-            onValueChange = {
-                email = it
-                errorMessage = null // limpia el error al escribir
-            },
+            onValueChange = { email = it; errorMessage = null },
             label = { Text("Correo electrónico") },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Email
-            ),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Email),
             singleLine = true,
             isError = errorMessage != null && email.isBlank(),
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo contraseña
         OutlinedTextField(
             value = password,
-            onValueChange = {
-                password = it
-                errorMessage = null
-            },
+            onValueChange = { password = it; errorMessage = null },
             label = { Text("Contraseña") },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Password
-            ),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             isError = errorMessage != null && password.length < 6,
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(8.dp))
-
-        // Campo confirmar contraseña
         OutlinedTextField(
             value = confirmPassword,
-            onValueChange = {
-                confirmPassword = it
-                errorMessage = null
-            },
+            onValueChange = { confirmPassword = it; errorMessage = null },
             label = { Text("Confirmar contraseña") },
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Password
-            ),
+            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
             visualTransformation = PasswordVisualTransformation(),
             singleLine = true,
             isError = errorMessage != null && password != confirmPassword,
             modifier = Modifier.fillMaxWidth()
         )
-
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón registrarse — mismo estilo que el botón principal de LoginScreen
         Button(
             onClick = {
                 val validationError = validate()
-                if (validationError != null) {
-                    errorMessage = validationError
-                    return@Button
-                }
+                if (validationError != null) { errorMessage = validationError; return@Button }
                 isLoading = true
                 scope.launch {
-                    try {
-                        FirebaseAuth.getInstance()
-                            .createUserWithEmailAndPassword(email, password)
-                            .await()
-                        // Registro exitoso: navega a la lista limpiando todo el backstack
+                    val error = authViewModel.registerWithEmail(email, password)
+                    isLoading = false
+                    if (error == null) {
                         navController.navigate("list") {
                             popUpTo("login") { inclusive = true }
                         }
-                    } catch (e: Exception) {
-                        errorMessage = when {
-                            e.message?.contains("email address is already in use") == true ->
-                                "Este correo ya está registrado"
-                            e.message?.contains("badly formatted") == true ->
-                                "El formato del correo no es válido"
-                            else -> e.message ?: "Error al crear la cuenta"
-                        }
-                    } finally {
-                        isLoading = false
+                    } else {
+                        errorMessage = error
                     }
                 }
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
-        ) {
-            Text("Crear cuenta")
-        }
+        ) { Text("Crear cuenta") }
 
-        // Indicador de carga
         if (isLoading) {
             Spacer(modifier = Modifier.height(16.dp))
             CircularProgressIndicator()
         }
 
-        // Mensaje de error
         errorMessage?.let {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(it, color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Volver al login — mismo estilo que el TextButton de LoginScreen
         TextButton(onClick = { navController.popBackStack() }) {
             Text("¿Ya tienes cuenta? Inicia sesión")
         }
