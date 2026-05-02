@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Acceso a Internet (Firebase, Storage, vídeo remoto) -->
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Cámara: feature + permiso en tiempo de ejecución -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
             android:allowBackup="true"
@@ -14,16 +19,32 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Filmoteca"
             tools:targetApi="31">
+
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
                 android:theme="@style/Theme.Filmoteca">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+            FileProvider: convierte rutas absolutas de archivos en URIs seguras
+            (esquema content://) para compartirlas con la cámara del sistema.
+            Evita la excepción FileUriExposedException en Android 7+.
+        -->
+        <provider
+                android:name="androidx.core.content.FileProvider"
+                android:authorities="${applicationId}.provider"
+                android:exported="false"
+                android:grantUriPermissions="true">
+            <meta-data
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/file_paths" />
+        </provider>
+
     </application>
 
 </manifest>
