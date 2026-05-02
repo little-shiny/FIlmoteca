@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import com.campusdigitalfp.filmoteca.R
 import com.campusdigitalfp.filmoteca.common.FilmImageThumbnail
+
 import com.campusdigitalfp.filmoteca.common.barraSuperior
 import com.campusdigitalfp.filmoteca.models.Film
 import com.campusdigitalfp.filmoteca.navigation.NavRoutes
@@ -125,6 +126,7 @@ fun ViewFilm(
         }
     }
 }
+
 
 @Composable
 fun ViewFilmList(

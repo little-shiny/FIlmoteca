@@ -81,16 +81,96 @@ class FilmViewModel : ViewModel() {
     /** Añade 10 películas de ejemplo a la colección del usuario actual */
     fun addExampleFilms() {
         val examples = listOf(
-            Film(title = "El Padrino", director = "Francis Ford Coppola", year = 1972, genre = "Drama", format = "Blu-Ray", comments = "Una obra maestra del cine."),
-            Film(title = "Pulp Fiction", director = "Quentin Tarantino", year = 1994, genre = "Drama", format = "DVD", comments = "Narrativa no lineal y diálogos brillantes."),
-            Film(title = "El Señor de los Anillos", director = "Peter Jackson", year = 2001, genre = "Acción", format = "Blu-Ray", comments = "Épica adaptación de Tolkien."),
-            Film(title = "Interestelar", director = "Christopher Nolan", year = 2014, genre = "Sci-Fi", format = "Blu-Ray", comments = "Viajes espaciales y relatividad."),
-            Film(title = "El Rey León", director = "Roger Allers", year = 1994, genre = "Drama", format = "Online", comments = "Clásico de animación de Disney."),
-            Film(title = "Matrix", director = "The Wachowskis", year = 1999, genre = "Sci-Fi", format = "DVD", comments = "¿Qué es real? Filosofía y acción."),
-            Film(title = "Titanic", director = "James Cameron", year = 1997, genre = "Drama", format = "Online", comments = "Romance épico y tragedia histórica."),
-            Film(title = "Forrest Gump", director = "Robert Zemeckis", year = 1994, genre = "Drama", format = "DVD", comments = "La vida es como una caja de bombones."),
-            Film(title = "El Silencio de los Corderos", director = "Jonathan Demme", year = 1991, genre = "Terror", format = "Blu-Ray", comments = "Thriller psicológico perturbador."),
-            Film(title = "Gladiator", director = "Ridley Scott", year = 2000, genre = "Acción", format = "Blu-Ray", comments = "Honor y venganza en Roma.")
+            Film(
+                title = "El Padrino",
+                director = "Francis Ford Coppola",
+                year = 1972,
+                genre = "Drama",
+                format = "Blu-Ray",
+                comments = "Una obra maestra del cine.",
+                imageUrl = "el_padrino"
+            ),
+            Film(
+                title = "Pulp Fiction",
+                director = "Quentin Tarantino",
+                year = 1994,
+                genre = "Drama",
+                format = "DVD",
+                comments = "Narrativa no lineal y diálogos brillantes.",
+                imageUrl = "pulp_fiction"
+            ),
+            Film(
+                title = "El Señor de los Anillos",
+                director = "Peter Jackson",
+                year = 2001,
+                genre = "Acción",
+                format = "Blu-Ray",
+                comments = "Épica adaptación de Tolkien.",
+                imageUrl = "anillos"
+            ),
+            Film(
+                title = "Interestelar",
+                director = "Christopher Nolan",
+                year = 2014,
+                genre = "Sci-Fi",
+                format = "Blu-Ray",
+                comments = "Viajes espaciales y relatividad.",
+                imageUrl = "interestellar"
+            ),
+            Film(
+                title = "El Rey León",
+                director = "Roger Allers",
+                year = 1994,
+                genre = "Drama",
+                format = "Online",
+                comments = "Clásico de animación de Disney.",
+                imageUrl = "el_rey_leon"
+            ),
+            Film(
+                title = "Matrix",
+                director = "The Wachowskis",
+                year = 1999,
+                genre = "Sci-Fi",
+                format = "DVD",
+                comments = "¿Qué es real? Filosofía y acción.",
+                imageUrl = "matrix"
+            ),
+            Film(
+                title = "Titanic",
+                director = "James Cameron",
+                year = 1997,
+                genre = "Drama",
+                format = "Online",
+                comments = "Romance épico y tragedia histórica.",
+                imageUrl = "titanic"
+            ),
+            Film(
+                title = "Forrest Gump",
+                director = "Robert Zemeckis",
+                year = 1994,
+                genre = "Drama",
+                format = "DVD",
+                comments = "La vida es como una caja de bombones.",
+                imageUrl = "forest"
+            ),
+            Film(
+                title = "El Silencio de los Corderos",
+                director = "Jonathan Demme",
+                year = 1991,
+                genre = "Terror",
+                format = "Blu-Ray",
+                comments = "Thriller psicológico perturbador.",
+                imageUrl = "el_silencio_de_los_corderos"
+            ),
+            Film(
+                title = "Gladiator",
+                director = "Ridley Scott",
+                year = 2000,
+                genre = "Acción",
+                format = "Blu-Ray",
+                comments = "Honor y venganza en Roma.",
+                imageUrl = "gladiator"
+            )
         )
         viewModelScope.launch {
             examples.forEach { film ->

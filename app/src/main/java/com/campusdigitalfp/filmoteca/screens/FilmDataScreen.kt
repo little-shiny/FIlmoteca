@@ -1,5 +1,6 @@
 package com.campusdigitalfp.filmoteca.screens
 
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -40,6 +41,7 @@ fun filmDataScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Imagen de la película (local o vacía)
+                // Imagen de la película (local o vacía)
                 FilmImageLarge(
                     imageUrl = currentFilm.imageUrl,
                     modifier = Modifier.padding(bottom = 12.dp)
@@ -64,7 +66,9 @@ fun filmDataScreen(
 
                 Button(
                     onClick = { navController.navigate(NavRoutes.EDIT.abreviatura + currentFilm.id) },
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 ) { Text("Editar") }
 
                 Button(
@@ -73,7 +77,9 @@ fun filmDataScreen(
                         navController.navigate(NavRoutes.LIST.abreviatura)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 ) { Text("Eliminar") }
 
                 Button(

@@ -1,11 +1,11 @@
 package com.campusdigitalfp.filmoteca.common
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,72 +15,86 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.campusdigitalfp.filmoteca.R
-import java.io.File
 
 /**
- * Construye el modelo correcto para Coil según el contenido de [imageUrl]:
+ * Devuelve el drawable dinámicamente usando el nombre
+ * almacenado en Firebase.
+ *
+ * Ejemplo:
+ * imageUrl = "matrix"
+ * -> R.drawable.matrix
  */
-fun imageModel(imageUrl: String): Any? = when {
-    imageUrl.isEmpty()        -> null
-    imageUrl.startsWith("/")  -> Uri.fromFile(File(imageUrl))   // ruta local absoluta
-    else                      -> imageUrl                        // URL remota
+fun getImageResId(
+    context: android.content.Context,
+    imageUrl: String
+): Int {
+
+    if (imageUrl.isEmpty()) {
+        return R.drawable.film
+    }
+
+    val resId = context.resources.getIdentifier(
+        imageUrl,
+        "drawable",
+        context.packageName
+    )
+
+    return if (resId != 0) resId else R.drawable.film
 }
 
 /**
- * Imagen grande para las pantallas de detalle y edición.
+ * Imagen grande para detalle/edición.
  */
 @Composable
-fun FilmImageLarge(imageUrl: String, modifier: Modifier = Modifier) {
-    val model = imageModel(imageUrl)
-    if (model != null) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(model)
-                .crossfade(true)
-                .build(),
-            contentDescription = "Imagen de la película",
-            contentScale = ContentScale.Crop,
-            modifier = modifier
-                .fillMaxWidth()
-                .height(220.dp)
-        )
-    } else {
-        Image(
-            painter = painterResource(R.drawable.film),
-            contentDescription = "Sin imagen",
-            modifier = modifier.size(120.dp)
-        )
-    }
+fun FilmImageLarge(
+    imageUrl: String,
+    modifier: Modifier = Modifier
+) {
+
+    val context = LocalContext.current
+
+    val imageResId = getImageResId(
+        context,
+        imageUrl
+    )
+
+    Image(
+        painter = painterResource(imageResId),
+        contentDescription = "Imagen de la película",
+        contentScale = ContentScale.Crop,
+
+        modifier = modifier
+            .fillMaxWidth()
+            .height(220.dp)
+            .clip(RoundedCornerShape(16.dp))
+    )
 }
 
 /**
- * Miniatura circular para la lista de películas.
+ * Miniatura circular para listas.
  */
 @Composable
-fun FilmImageThumbnail(imageUrl: String, modifier: Modifier = Modifier, size: Dp = 48.dp) {
-    val model = imageModel(imageUrl)
-    if (model != null) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(model)
-                .crossfade(true)
-                .build(),
-            contentDescription = "Miniatura",
-            contentScale = ContentScale.Crop,
-            modifier = modifier
-                .size(size)
-                .clip(CircleShape)
-        )
-    } else {
-        Image(
-            painter = painterResource(R.drawable.film),
-            contentDescription = "Sin imagen",
-            modifier = modifier
-                .size(size)
-                .clip(CircleShape)
-        )
-    }
+fun FilmImageThumbnail(
+    imageUrl: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 48.dp
+) {
+
+    val context = LocalContext.current
+
+    val imageResId = getImageResId(
+        context,
+        imageUrl
+    )
+
+    Image(
+        painter = painterResource(imageResId),
+        contentDescription = "Miniatura",
+        contentScale = ContentScale.Crop,
+
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+    )
 }

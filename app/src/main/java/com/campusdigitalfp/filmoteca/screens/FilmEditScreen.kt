@@ -1,5 +1,6 @@
 package com.campusdigitalfp.filmoteca.screens
 
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
